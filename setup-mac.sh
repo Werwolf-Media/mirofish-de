@@ -80,7 +80,7 @@ cat <<EOF
       npm run dev
 
  3) Browser oeffnen:
-      http://localhost:3000
+      http://localhost:3100
     (Oberflaeche ist standardmaessig auf Deutsch; Sprache oben rechts umstellbar)
 
  Tipp: Damit uv dauerhaft auf PATH ist, einmalig:

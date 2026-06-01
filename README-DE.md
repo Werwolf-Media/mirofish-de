@@ -65,7 +65,7 @@ export PATH="$HOME/.local/bin:$PATH"   # falls uv nicht auf PATH ist
 npm run dev
 ```
 
-Dann im Browser öffnen: **http://localhost:3000**
+Dann im Browser öffnen: **http://localhost:3100**
 
 > Für den ersten Durchlauf den *Benutzerdefinierten Modus* mit wenigen Runden
 > (z. B. 20–40) wählen — das hält Kosten und Fehlerrisiko niedrig.
