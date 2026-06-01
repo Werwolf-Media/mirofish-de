@@ -12,6 +12,7 @@
         <a href="https://github.com/Werwolf-Media/mirofish-de" target="_blank" class="github-link">
           {{ $t('nav.visitGithub') }} <span class="arrow">↗</span>
         </a>
+        <button class="logout-link" @click="handleLogout">{{ $t('login.logout') }}</button>
       </div>
     </nav>
 
@@ -231,8 +232,11 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import HistoryDatabase from '../components/HistoryDatabase.vue'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
+import { logout } from '../store/auth'
 
 const router = useRouter()
+
+const handleLogout = () => logout()
 
 // 表单数据
 const formData = ref({
@@ -418,6 +422,24 @@ const startSimulation = () => {
 
 .arrow {
   font-family: sans-serif;
+}
+
+.logout-link {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--white);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.2s, border-color 0.2s;
+}
+
+.logout-link:hover {
+  opacity: 0.85;
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 /* 主要内容区 */

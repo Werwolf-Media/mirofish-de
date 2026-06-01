@@ -14,6 +14,10 @@ const service = axios.create({
 service.interceptors.request.use(
   config => {
     config.headers['Accept-Language'] = i18n.global.locale.value
+    const token = localStorage.getItem('appToken')
+    if (token) {
+      config.headers['X-App-Token'] = token
+    }
     return config
   },
   error => {
@@ -37,7 +41,12 @@ service.interceptors.response.use(
   },
   error => {
     console.error('Response error:', error)
-    
+
+    // 401: Token ungültig/abgelaufen -> abmelden, Login-Overlay erscheint wieder
+    if (error.response && error.response.status === 401) {
+      import('../store/auth').then(({ logout }) => logout())
+    }
+
     // 处理超时
     if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
       console.error('Request timeout')

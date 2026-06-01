@@ -1,9 +1,11 @@
 <template>
-  <router-view />
+  <LoginScreen v-if="!auth.token" />
+  <router-view v-else />
 </template>
 
 <script setup>
-// 使用 Vue Router 来管理页面
+import { auth } from './store/auth'
+import LoginScreen from './components/LoginScreen.vue'
 </script>
 
 <style>

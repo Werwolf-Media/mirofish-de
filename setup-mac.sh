@@ -60,6 +60,9 @@ LLM_MODEL_NAME=openai/gpt-4o-mini
 
 # ===== Zep Cloud (Memory-Graph, Pflicht) - Key von https://app.getzep.com =====
 ZEP_API_KEY=HIER_ZEP_KEY_EINTRAGEN
+
+# ===== Zugriffsschutz (Login) - Passwort fuer den Login-Screen =====
+APP_PASSWORD=werwolf123#
 ENVEOF
   echo "==> .env-Vorlage angelegt."
 fi

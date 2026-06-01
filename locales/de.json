@@ -32,6 +32,15 @@
   "nav": {
     "visitGithub": "Besuchen Sie unsere GitHub-Seite"
   },
+  "login": {
+    "title": "Zugriff geschützt",
+    "subtitle": "Bitte geben Sie das Passwort ein, um fortzufahren",
+    "passwordPlaceholder": "Passwort",
+    "submit": "Anmelden",
+    "submitting": "Wird geprüft ...",
+    "error": "Falsches Passwort",
+    "logout": "Abmelden"
+  },
   "home": {
     "tagline": "Schlanke & universelle Schwarmintelligenz-Engine",
     "version": "/ v0.1-Preview",
@@ -396,7 +405,8 @@
     "germanSourcesFilename": "Deutsche Quellen (automatisch abgerufen)",
     "germanSourcesAdded": "{count} deutsche Quellenartikel als Seed-Material hinzugefügt",
     "germanSourcesNone": "Keine passenden deutschen Quellen gefunden",
-    "germanSourcesFailed": "Abruf deutscher Quellen fehlgeschlagen: {error}"
+    "germanSourcesFailed": "Abruf deutscher Quellen fehlgeschlagen: {error}",
+    "loginInvalid": "Falsches Passwort"
   },
   "progress": {
     "initGraphService": "Graph-Aufbaudienst wird initialisiert ...",

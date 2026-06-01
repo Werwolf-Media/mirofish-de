@@ -32,6 +32,15 @@
   "nav": {
     "visitGithub": "Visit our Github page"
   },
+  "login": {
+    "title": "Access protected",
+    "subtitle": "Please enter the password to continue",
+    "passwordPlaceholder": "Password",
+    "submit": "Log in",
+    "submitting": "Checking...",
+    "error": "Incorrect password",
+    "logout": "Log out"
+  },
   "home": {
     "tagline": "Concise & Universal Swarm Intelligence Engine",
     "version": "/ v0.1-Preview",
@@ -396,7 +405,8 @@
     "germanSourcesFilename": "German sources (auto-fetched)",
     "germanSourcesAdded": "{count} German source articles added as seed material",
     "germanSourcesNone": "No matching German sources found",
-    "germanSourcesFailed": "Failed to fetch German sources: {error}"
+    "germanSourcesFailed": "Failed to fetch German sources: {error}",
+    "loginInvalid": "Incorrect password"
   },
   "progress": {
     "initGraphService": "Initializing graph build service...",

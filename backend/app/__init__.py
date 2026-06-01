@@ -9,11 +9,12 @@ import warnings
 # 需要在所有其他导入之前设置
 warnings.filterwarnings("ignore", message=".*resource_tracker.*")
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from .config import Config
 from .utils.logger import setup_logger, get_logger
+from .utils.auth import check_token
 
 
 def create_app(config_class=Config):
@@ -48,6 +49,25 @@ def create_app(config_class=Config):
     if should_log_startup:
         logger.info("已注册模拟进程清理函数")
     
+    # Zugriffsschutz: alle /api/* Routen erfordern ein gültiges Token (außer Login)
+    @app.before_request
+    def require_auth():
+        if request.method == 'OPTIONS':
+            return None  # CORS-Preflight durchlassen
+        path = request.path or ''
+        # Öffentliche Endpunkte (kein Token nötig)
+        if path == '/health' or path.rstrip('/') == '/api/auth/login':
+            return None
+        if path.startswith('/api/'):
+            token = request.headers.get('X-App-Token', '')
+            if not token:
+                auth_header = request.headers.get('Authorization', '')
+                if auth_header.startswith('Bearer '):
+                    token = auth_header[7:]
+            if not check_token(token):
+                return jsonify({"success": False, "error": "unauthorized"}), 401
+        return None
+
     # 请求日志中间件
     @app.before_request
     def log_request():

@@ -40,6 +40,9 @@ Markt aufbereitet:
   Prompt (öffentlicher Google-News-RSS, kein API-Schlüssel nötig) und hängt sie als
   zusätzliches Seed-Material an die hochgeladenen Dokumente an. Standardmäßig **aus**.
 - **Co-Branding** Werwolf Media (Logo + Favicon).
+- **Zugriffsschutz (Login)** — vorgeschalteter Passwort-Login. Das Passwort wird
+  serverseitig geprüft (Token-basiert, API ist ohne Login gesperrt). Standardpasswort
+  `werwolf123#`, änderbar in der `.env` über `APP_PASSWORD`.
 
 Die Sprache lässt sich oben rechts jederzeit umstellen (Deutsch / English / 中文).
 
