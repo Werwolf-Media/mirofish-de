@@ -81,7 +81,7 @@ cat <<EOF
 
  3) Browser oeffnen:
       http://localhost:3000
-    (Sprache oben rechts umstellbar; Deutsch folgt mit de.json)
+    (Oberflaeche ist standardmaessig auf Deutsch; Sprache oben rechts umstellbar)
 
  Tipp: Damit uv dauerhaft auf PATH ist, einmalig:
       echo 'export PATH="\$HOME/.local/bin:\$PATH"' >> ~/.zshrc
