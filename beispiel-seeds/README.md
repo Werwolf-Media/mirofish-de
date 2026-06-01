@@ -11,7 +11,7 @@ genau das, was ihr beim Start im Feld *Simulations-Prompt* eintragen könnt.
 
 ## So nutzt du sie
 
-1. MiroFish starten (`npm run dev` → http://localhost:3100).
+1. MiroFish starten (`npm run dev` → http://localhost:4280).
 2. Eine der `.md`-Dateien aus diesem Ordner hochladen (Drag & Drop im Bereich *Realitäts-Seed*).
 3. Den vorgeschlagenen Prompt aus der Datei in das Feld *Simulations-Prompt* kopieren (oder einen eigenen formulieren).
 4. **Engine starten**. Für den ersten Durchlauf den *Benutzerdefinierten Modus* mit wenigen Runden (z. B. 20–40) wählen, um Kosten und Fehlerrisiko gering zu halten.
