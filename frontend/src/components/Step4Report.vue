@@ -5156,7 +5156,8 @@ watch(() => props.reportId, (newId) => {
 
 <style>
 /* English locale: smaller report title */
-html[lang="en"] .report-header-block .main-title {
+html[lang="en"] .report-header-block .main-title,
+html[lang="de"] .report-header-block .main-title {
   font-size: 28px;
 }
 </style>

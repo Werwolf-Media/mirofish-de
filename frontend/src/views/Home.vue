@@ -2,10 +2,14 @@
   <div class="home-container">
     <!-- 顶部导航栏 -->
     <nav class="navbar">
-      <div class="nav-brand">MIROFISH</div>
+      <div class="nav-brand">
+        <img src="../assets/logo/werwolf-icon.svg" alt="Werwolf Media" class="nav-logo" />
+        <span class="nav-title">MIROFISH</span>
+        <span class="nav-byline">by Werwolf Media</span>
+      </div>
       <div class="nav-links">
         <LanguageSwitcher />
-        <a href="https://github.com/666ghj/MiroFish" target="_blank" class="github-link">
+        <a href="https://github.com/Werwolf-Media/mirofish-de" target="_blank" class="github-link">
           {{ $t('nav.visitGithub') }} <span class="arrow">↗</span>
         </a>
       </div>
@@ -348,10 +352,32 @@ const startSimulation = () => {
 }
 
 .nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-mono);
+}
+
+.nav-logo {
+  height: 28px;
+  width: auto;
+  /* Schwarzes Vektor-Logo auf dunkler Navbar auf Weiß invertieren */
+  filter: brightness(0) invert(1);
+}
+
+.nav-title {
   font-weight: 800;
   letter-spacing: 1px;
   font-size: 1.2rem;
+}
+
+.nav-byline {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  opacity: 0.6;
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .nav-links {
@@ -898,56 +924,67 @@ const startSimulation = () => {
 
 <style>
 /* English locale adjustments (unscoped to target html[lang]) */
-html[lang="en"] .main-title {
+html[lang="en"] .main-title,
+html[lang="de"] .main-title {
   font-size: 3.5rem;
   font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: -1px;
 }
 
-html[lang="en"] .hero-desc {
+html[lang="en"] .hero-desc,
+html[lang="de"] .hero-desc {
   text-align: left;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: 0;
 }
 
-html[lang="en"] .slogan-text {
+html[lang="en"] .slogan-text,
+html[lang="de"] .slogan-text {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: 0;
 }
 
-html[lang="en"] .tag-row {
+html[lang="en"] .tag-row,
+html[lang="de"] .tag-row {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-html[lang="en"] .navbar .nav-links {
+html[lang="en"] .navbar .nav-links,
+html[lang="de"] .navbar .nav-links {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 /* Left pane: system status + workflow */
-html[lang="en"] .status-section {
+html[lang="en"] .status-section,
+html[lang="de"] .status-section {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-html[lang="en"] .status-section .status-ready {
+html[lang="en"] .status-section .status-ready,
+html[lang="de"] .status-section .status-ready {
   font-size: 1.6rem;
 }
 
-html[lang="en"] .status-section .metric-value {
+html[lang="en"] .status-section .metric-value,
+html[lang="de"] .status-section .metric-value {
   font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 1.4rem;
 }
 
-html[lang="en"] .workflow-list .step-title {
+html[lang="en"] .workflow-list .step-title,
+html[lang="de"] .workflow-list .step-title {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-html[lang="en"] .workflow-list .step-desc {
+html[lang="en"] .workflow-list .step-desc,
+html[lang="de"] .workflow-list .step-desc {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   font-size: 0.72rem !important;
   line-height: 1.4 !important;
 }
 
-html[lang="en"] .workflow-list {
+html[lang="en"] .workflow-list,
+html[lang="de"] .workflow-list {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 </style>
