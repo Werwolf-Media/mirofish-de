@@ -13,6 +13,7 @@ from ..config import Config
 from ..services.ontology_generator import OntologyGenerator
 from ..services.graph_builder import GraphBuilderService
 from ..services.text_processor import TextProcessor
+from ..services.german_sources import GermanSourcesService
 from ..utils.file_parser import FileParser
 from ..utils.logger import get_logger
 from ..utils.locale import t, get_locale, set_locale
@@ -154,6 +155,8 @@ def generate_ontology():
         simulation_requirement = request.form.get('simulation_requirement', '')
         project_name = request.form.get('project_name', 'Unnamed Project')
         additional_context = request.form.get('additional_context', '')
+        include_german_sources = request.form.get('include_german_sources', '') \
+            .strip().lower() in ('1', 'true', 'yes', 'on')
         
         logger.debug(f"项目名称: {project_name}")
         logger.debug(f"模拟需求: {simulation_requirement[:100]}...")
@@ -199,7 +202,28 @@ def generate_ontology():
                 text = TextProcessor.preprocess_text(text)
                 document_texts.append(text)
                 all_text += f"\n\n=== {file_info['original_filename']} ===\n{text}"
-        
+
+        # Opt-in: aktuelle deutsche Quellen als zusätzliches Seed-Material einbinden
+        german_sources_count = 0
+        if include_german_sources:
+            logger.info(t('api.germanSourcesFetching'))
+            try:
+                source_text, source_items = GermanSourcesService.fetch(simulation_requirement)
+                if source_text:
+                    processed = TextProcessor.preprocess_text(source_text)
+                    document_texts.append(processed)
+                    all_text += f"\n\n=== {t('api.germanSourcesHeader')} ===\n{processed}"
+                    german_sources_count = len(source_items)
+                    project.files.append({
+                        "filename": t('api.germanSourcesFilename'),
+                        "size": len(processed)
+                    })
+                    logger.info(t('api.germanSourcesAdded', count=german_sources_count))
+                else:
+                    logger.info(t('api.germanSourcesNone'))
+            except Exception as e:
+                logger.warning(t('api.germanSourcesFailed', error=str(e)))
+
         if not document_texts:
             ProjectManager.delete_project(project.project_id)
             return jsonify({
@@ -243,7 +267,8 @@ def generate_ontology():
                 "ontology": project.ontology,
                 "analysis_summary": project.analysis_summary,
                 "files": project.files,
-                "total_text_length": project.total_text_length
+                "total_text_length": project.total_text_length,
+                "german_sources_count": german_sources_count
             }
         })
         

@@ -193,6 +193,17 @@
               </div>
             </div>
 
+            <!-- Opt-in: Deutsche Quellen -->
+            <div class="console-section">
+              <label class="source-optin" :class="{ disabled: loading }">
+                <input type="checkbox" v-model="includeGermanSources" :disabled="loading" />
+                <span class="source-optin-text">
+                  <span class="source-optin-label">{{ $t('home.germanSourcesLabel') }}</span>
+                  <span class="source-optin-hint">{{ $t('home.germanSourcesHint') }}</span>
+                </span>
+              </label>
+            </div>
+
             <!-- 启动按钮 -->
             <div class="console-section btn-section">
               <button 
@@ -230,6 +241,9 @@ const formData = ref({
 
 // 文件列表
 const files = ref([])
+
+// Opt-in: aktuelle deutsche Quellen als zusätzliches Seed-Material einbeziehen
+const includeGermanSources = ref(false)
 
 // 状态
 const loading = ref(false)
@@ -304,7 +318,7 @@ const startSimulation = () => {
   
   // 存储待上传的数据
   import('../store/pendingUpload.js').then(({ setPendingUpload }) => {
-    setPendingUpload(files.value, formData.value.simulationRequirement)
+    setPendingUpload(files.value, formData.value.simulationRequirement, includeGermanSources.value)
     
     // 立即跳转到Process页面（使用特殊标识表示新建项目）
     router.push({
@@ -709,6 +723,46 @@ const startSimulation = () => {
 
 .console-section.btn-section {
   padding-top: 0;
+}
+
+.source-optin {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.source-optin.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.source-optin input[type="checkbox"] {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--orange, #ff6b2c);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.source-optin-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.source-optin-label {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.source-optin-hint {
+  font-size: 0.75rem;
+  opacity: 0.6;
+  line-height: 1.3;
 }
 
 .console-header {

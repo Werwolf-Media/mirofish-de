@@ -69,7 +69,9 @@
     "promptPlaceholder": "// 用自然语言输入模拟或预测需求（例.武大若发布撤销肖某处分的公告，会引发什么舆情走向）",
     "engineBadge": "引擎: MiroFish-V1.0",
     "startEngine": "启动引擎",
-    "initializing": "初始化中..."
+    "initializing": "初始化中...",
+    "germanSourcesLabel": "引入德语来源",
+    "germanSourcesHint": "可选：根据需求抓取相关的德语新闻作为额外的种子材料"
   },
   "main": {
     "layoutGraph": "图谱",
@@ -388,7 +390,13 @@
     "envRunning": "环境正在运行，可以接收Interview命令",
     "envNotRunningShort": "环境未运行或已关闭",
     "requireGraphIdAndQuery": "请提供 graph_id 和 query",
-    "initReportAgent": "初始化Report Agent..."
+    "initReportAgent": "初始化Report Agent...",
+    "germanSourcesFetching": "正在抓取德语来源...",
+    "germanSourcesHeader": "最新德语来源",
+    "germanSourcesFilename": "德语来源（自动抓取）",
+    "germanSourcesAdded": "已添加 {count} 条德语来源作为种子材料",
+    "germanSourcesNone": "未找到匹配的德语来源",
+    "germanSourcesFailed": "抓取德语来源失败：{error}"
   },
   "progress": {
     "initGraphService": "初始化图谱构建服务...",

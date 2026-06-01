@@ -35,6 +35,10 @@ Markt aufbereitet:
   werden auf Deutsch generiert (über `get_language_instruction()`).
 - **Deutsche Beispiel-Seeds** im Ordner [`beispiel-seeds/`](./beispiel-seeds/) zum
   sofortigen Ausprobieren.
+- **Opt-in „Deutsche Quellen einbeziehen"** — auf der Startseite anhakbar. Ist es
+  aktiv, holt MiroFish vor der Simulation aktuelle deutsche Nachrichten passend zum
+  Prompt (öffentlicher Google-News-RSS, kein API-Schlüssel nötig) und hängt sie als
+  zusätzliches Seed-Material an die hochgeladenen Dokumente an. Standardmäßig **aus**.
 - **Co-Branding** Werwolf Media (Logo + Favicon).
 
 Die Sprache lässt sich oben rechts jederzeit umstellen (Deutsch / English / 中文).

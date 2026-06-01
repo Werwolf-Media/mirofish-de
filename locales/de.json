@@ -69,7 +69,9 @@
     "promptPlaceholder": "// Beschreiben Sie Ihre Simulations- oder Prognoseanforderung in natürlicher Sprache",
     "engineBadge": "Engine: MiroFish-V1.0",
     "startEngine": "Engine starten",
-    "initializing": "Wird initialisiert ..."
+    "initializing": "Wird initialisiert ...",
+    "germanSourcesLabel": "Deutsche Quellen einbeziehen",
+    "germanSourcesHint": "Optional: aktuelle deutsche Nachrichten passend zum Prompt als zusätzliches Seed-Material abrufen"
   },
   "main": {
     "layoutGraph": "Graph",
@@ -388,7 +390,13 @@
     "envRunning": "Umgebung läuft und ist bereit für Interview-Befehle",
     "envNotRunningShort": "Umgebung läuft nicht oder ist geschlossen",
     "requireGraphIdAndQuery": "Bitte geben Sie graph_id und query an",
-    "initReportAgent": "Report Agent wird initialisiert ..."
+    "initReportAgent": "Report Agent wird initialisiert ...",
+    "germanSourcesFetching": "Aktuelle deutsche Quellen werden abgerufen ...",
+    "germanSourcesHeader": "Aktuelle deutsche Quellen",
+    "germanSourcesFilename": "Deutsche Quellen (automatisch abgerufen)",
+    "germanSourcesAdded": "{count} deutsche Quellenartikel als Seed-Material hinzugefügt",
+    "germanSourcesNone": "Keine passenden deutschen Quellen gefunden",
+    "germanSourcesFailed": "Abruf deutscher Quellen fehlgeschlagen: {error}"
   },
   "progress": {
     "initGraphService": "Graph-Aufbaudienst wird initialisiert ...",

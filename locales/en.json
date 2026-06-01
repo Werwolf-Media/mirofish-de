@@ -69,7 +69,9 @@
     "promptPlaceholder": "// Describe your simulation or prediction requirement in natural language",
     "engineBadge": "Engine: MiroFish-V1.0",
     "startEngine": "Start Engine",
-    "initializing": "Initializing..."
+    "initializing": "Initializing...",
+    "germanSourcesLabel": "Include German sources",
+    "germanSourcesHint": "Optional: fetch current German news matching your prompt as extra seed material"
   },
   "main": {
     "layoutGraph": "Graph",
@@ -388,7 +390,13 @@
     "envRunning": "Environment is running and ready for Interview commands",
     "envNotRunningShort": "Environment not running or closed",
     "requireGraphIdAndQuery": "Please provide graph_id and query",
-    "initReportAgent": "Initializing Report Agent..."
+    "initReportAgent": "Initializing Report Agent...",
+    "germanSourcesFetching": "Fetching current German sources...",
+    "germanSourcesHeader": "Current German sources",
+    "germanSourcesFilename": "German sources (auto-fetched)",
+    "germanSourcesAdded": "{count} German source articles added as seed material",
+    "germanSourcesNone": "No matching German sources found",
+    "germanSourcesFailed": "Failed to fetch German sources: {error}"
   },
   "progress": {
     "initGraphService": "Initializing graph build service...",
