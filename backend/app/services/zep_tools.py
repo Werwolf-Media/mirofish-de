@@ -18,7 +18,7 @@ from zep_cloud.client import Zep
 from ..config import Config
 from ..utils.logger import get_logger
 from ..utils.llm_client import LLMClient
-from ..utils.locale import get_locale, t
+from ..utils.locale import get_locale, get_language_instruction, t
 from ..utils.zep_paging import fetch_all_nodes, fetch_all_edges
 
 logger = get_logger('mirofish.zep_tools')
@@ -1348,7 +1348,7 @@ class ZepToolsService:
         # 将问题合并为一个采访prompt
         combined_prompt = "\n".join([f"{i+1}. {q}" for i, q in enumerate(result.interview_questions)])
         
-        # 添加优化前缀，约束Agent回复格式
+        # 添加优化前缀，约束Agent回复格式（语言由 get_language_instruction 决定）
         INTERVIEW_PROMPT_PREFIX = (
             "你正在接受一次采访。请结合你的人设、所有的过往记忆与行动，"
             "以纯文本方式直接回答以下问题。\n"
@@ -1360,7 +1360,7 @@ class ZepToolsService:
             "5. 每个问题的回答之间用空行分隔\n"
             "6. 回答要有实质内容，每个问题至少回答2-3句话\n\n"
         )
-        optimized_prompt = f"{INTERVIEW_PROMPT_PREFIX}{combined_prompt}"
+        optimized_prompt = f"{INTERVIEW_PROMPT_PREFIX}{combined_prompt}\n\n{get_language_instruction()}"
         
         # Step 4: 调用真实的采访API（不指定platform，默认双平台同时采访）
         try:
@@ -1651,7 +1651,7 @@ class ZepToolsService:
 5. 每个问题控制在50字以内，简洁明了
 6. 直接提问，不要包含背景说明或前缀
 
-返回JSON格式：{"questions": ["问题1", "问题2", ...]}"""
+返回JSON格式：{"questions": ["问题1", "问题2", ...]}""" + f"\n\n{get_language_instruction()}"
 
         user_prompt = f"""采访需求：{interview_requirement}
 
@@ -1710,7 +1710,9 @@ class ZepToolsService:
 - 不要使用Markdown标题（如#、##、###）
 - 不要使用分割线（如---、***）
 - {quote_instruction}
-- 可以使用**加粗**标记关键词，但不要使用其他Markdown语法"""
+- 可以使用**加粗**标记关键词，但不要使用其他Markdown语法
+
+{get_language_instruction()}"""
 
         user_prompt = f"""采访主题：{interview_requirement}
 
