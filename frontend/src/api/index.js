@@ -47,6 +47,12 @@ service.interceptors.response.use(
       import('../store/auth').then(({ logout }) => logout())
     }
 
+    // Echte Backend-Fehlermeldung durchreichen (statt "Request failed with status code 4xx")
+    const backendMsg = error.response?.data?.error || error.response?.data?.message
+    if (backendMsg && typeof backendMsg === 'string') {
+      error.message = backendMsg
+    }
+
     // 处理超时
     if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
       console.error('Request timeout')

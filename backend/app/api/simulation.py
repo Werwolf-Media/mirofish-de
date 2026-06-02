@@ -14,7 +14,8 @@ from ..services.oasis_profile_generator import OasisProfileGenerator
 from ..services.simulation_manager import SimulationManager, SimulationStatus
 from ..services.simulation_runner import SimulationRunner, RunnerStatus
 from ..utils.logger import get_logger
-from ..utils.locale import t, get_locale, set_locale
+from ..utils.locale import t, get_locale, set_locale, get_language_instruction
+from ..utils.llm_client import LLMClient
 from ..models.project import ProjectManager
 
 logger = get_logger('mirofish.api.simulation')
@@ -41,6 +42,84 @@ def optimize_interview_prompt(prompt: str) -> str:
     if prompt.startswith(INTERVIEW_PROMPT_PREFIX):
         return prompt
     return f"{INTERVIEW_PROMPT_PREFIX}{prompt}"
+
+
+def _persona_chat_fallback(simulation_id: str, interviews: list):
+    """
+    Fallback, wenn die OASIS-Umgebung nicht (mehr) läuft:
+    erzeugt die Agenten-Antwort per LLM aus dem gespeicherten Persona-Profil.
+
+    Gibt das Ergebnis im selben Format wie die echte Interview-API zurück
+    ({"result": {"results": {"reddit_<id>": {...}}}}), oder None, wenn kein
+    Profil geladen werden kann (dann greift der normale 400-Fehler).
+    """
+    manager = SimulationManager()
+    profiles = []
+    for plat in ('reddit', 'twitter'):
+        try:
+            loaded = manager.get_profiles(simulation_id, platform=plat)
+            if loaded:
+                profiles = loaded
+                break
+        except Exception:
+            continue
+    if not profiles:
+        return None
+
+    llm = LLMClient()
+    lang = get_language_instruction()
+    results = {}
+    for interview in interviews:
+        try:
+            agent_id = int(interview.get('agent_id'))
+        except (TypeError, ValueError):
+            continue
+        if not (0 <= agent_id < len(profiles)):
+            continue
+        profile = profiles[agent_id]
+        prompt = interview.get('prompt', '')
+        name = profile.get('name') or profile.get('username') or f"Agent {agent_id}"
+        bio = profile.get('bio', '')
+        persona = profile.get('persona', '')
+        profession = profile.get('profession', '')
+        system_prompt = (
+            f"Du bist {name}" + (f" ({profession})" if profession else "") + ".\n"
+            f"Biografie: {bio}\n"
+            f"Hintergrund/Persona: {persona}\n\n"
+            "Du wirst gerade interviewt. Bleibe konsequent in deiner Rolle und antworte aus deiner "
+            "persönlichen Sicht in natürlicher Sprache. Keine Werkzeuge/Tools, kein JSON, keine "
+            "Markdown-Überschriften.\n"
+            f"{lang}"
+        )
+        try:
+            response = llm.chat(
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7
+            )
+        except Exception as e:
+            logger.warning(f"Persona-Fallback LLM-Fehler (agent {agent_id}): {e}")
+            continue
+        results[f"reddit_{agent_id}"] = {
+            "agent_id": agent_id,
+            "response": response,
+            "platform": "reddit"
+        }
+
+    if not results:
+        return None
+
+    return {
+        "success": True,
+        "fallback": True,
+        "interviews_count": len(results),
+        "result": {
+            "interviews_count": len(results),
+            "results": results
+        }
+    }
 
 
 # ============== 实体读取接口 ==============
@@ -2359,8 +2438,12 @@ def interview_agents_batch():
                     "error": t('api.interviewListInvalidPlatform', index=i+1)
                 }), 400
 
-        # 检查环境状态
+        # 检查环境状态 - falls die OASIS-Umgebung nicht (mehr) läuft, Persona-LLM-Fallback nutzen
         if not SimulationRunner.check_env_alive(simulation_id):
+            fallback = _persona_chat_fallback(simulation_id, interviews)
+            if fallback is not None:
+                logger.info(f"Umgebung nicht aktiv – Persona-LLM-Fallback für {len(interviews)} Interview(s)")
+                return jsonify({"success": True, "data": fallback})
             return jsonify({
                 "success": False,
                 "error": t('api.envNotRunning')
