@@ -8,13 +8,15 @@ const state = reactive({
   files: [],
   simulationRequirement: '',
   includeGermanSources: false,
+  seedText: '',
   isPending: false
 })
 
-export function setPendingUpload(files, requirement, includeGermanSources = false) {
+export function setPendingUpload(files, requirement, includeGermanSources = false, seedText = '') {
   state.files = files
   state.simulationRequirement = requirement
   state.includeGermanSources = includeGermanSources
+  state.seedText = seedText
   state.isPending = true
 }
 
@@ -23,6 +25,7 @@ export function getPendingUpload() {
     files: state.files,
     simulationRequirement: state.simulationRequirement,
     includeGermanSources: state.includeGermanSources,
+    seedText: state.seedText,
     isPending: state.isPending
   }
 }
@@ -31,6 +34,7 @@ export function clearPendingUpload() {
   state.files = []
   state.simulationRequirement = ''
   state.includeGermanSources = false
+  state.seedText = ''
   state.isPending = false
 }
 

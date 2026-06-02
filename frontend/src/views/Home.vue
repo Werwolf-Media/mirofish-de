@@ -131,6 +131,16 @@
         <!-- 右栏：交互控制台 -->
         <div class="right-panel">
           <div class="console-box">
+            <!-- Onboarding-Assistent (geführter Input) -->
+            <button class="wizard-launch" @click="showWizard = true" :disabled="loading">
+              <span class="wizard-launch-icon">✨</span>
+              <span class="wizard-launch-text">
+                <span class="wizard-launch-title">{{ $t('onboarding.launchTitle') }}</span>
+                <span class="wizard-launch-sub">{{ $t('onboarding.launchSubtitle') }}</span>
+              </span>
+              <span class="wizard-launch-arrow">→</span>
+            </button>
+
             <!-- 上传区域 -->
             <div class="console-section">
               <div class="console-header">
@@ -224,6 +234,9 @@
       <!-- 历史项目数据库 -->
       <HistoryDatabase />
     </div>
+
+    <!-- Onboarding-Assistent -->
+    <OnboardingWizard v-if="showWizard" @close="showWizard = false" @submit="onWizardSubmit" />
   </div>
 </template>
 
@@ -232,11 +245,22 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import HistoryDatabase from '../components/HistoryDatabase.vue'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
+import OnboardingWizard from '../components/OnboardingWizard.vue'
 import { logout } from '../store/auth'
 
 const router = useRouter()
 
 const handleLogout = () => logout()
+
+// Onboarding-Assistent
+const showWizard = ref(false)
+const onWizardSubmit = (payload) => {
+  showWizard.value = false
+  import('../store/pendingUpload.js').then(({ setPendingUpload }) => {
+    setPendingUpload(payload.files, payload.requirement, payload.includeGermanSources, payload.seedText)
+    router.push({ name: 'Process', params: { projectId: 'new' } })
+  })
+}
 
 // 表单数据
 const formData = ref({
@@ -738,6 +762,31 @@ const startSimulation = () => {
   border: 1px solid #CCC; /* 外部实线 */
   padding: 8px; /* 内边距形成双重边框感 */
 }
+
+.wizard-launch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 8px;
+  padding: 14px 16px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-mono);
+  transition: opacity 0.2s;
+}
+
+.wizard-launch:hover:not(:disabled) { opacity: 0.9; }
+.wizard-launch:disabled { opacity: 0.5; cursor: not-allowed; }
+.wizard-launch-icon { font-size: 18px; }
+.wizard-launch-text { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+.wizard-launch-title { font-weight: 700; font-size: 0.92rem; letter-spacing: 0.3px; }
+.wizard-launch-sub { font-size: 0.72rem; opacity: 0.7; }
+.wizard-launch-arrow { font-size: 16px; opacity: 0.8; }
 
 .console-section {
   padding: 20px;

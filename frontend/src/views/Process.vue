@@ -568,7 +568,7 @@ const initProject = async () => {
 const handleNewProject = async () => {
   const pending = getPendingUpload()
   
-  if (!pending.isPending || pending.files.length === 0) {
+  if (!pending.isPending || (pending.files.length === 0 && !pending.seedText && !pending.includeGermanSources)) {
     error.value = '没有待上传的文件，请返回首页重新操作'
     loading.value = false
     return
@@ -587,6 +587,9 @@ const handleNewProject = async () => {
     formDataObj.append('simulation_requirement', pending.simulationRequirement)
     if (pending.includeGermanSources) {
       formDataObj.append('include_german_sources', 'true')
+    }
+    if (pending.seedText) {
+      formDataObj.append('seed_text', pending.seedText)
     }
 
     // 调用本体生成 API

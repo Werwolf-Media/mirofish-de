@@ -193,9 +193,9 @@ const initProject = async () => {
 
 const handleNewProject = async () => {
   const pending = getPendingUpload()
-  if (!pending.isPending || pending.files.length === 0) {
-    error.value = 'No pending files found.'
-    addLog('Error: No pending files found for new project.')
+  if (!pending.isPending || (pending.files.length === 0 && !pending.seedText && !pending.includeGermanSources)) {
+    error.value = 'No pending input found.'
+    addLog('Error: No pending input found for new project.')
     return
   }
   
@@ -210,6 +210,9 @@ const handleNewProject = async () => {
     formData.append('simulation_requirement', pending.simulationRequirement)
     if (pending.includeGermanSources) {
       formData.append('include_german_sources', 'true')
+    }
+    if (pending.seedText) {
+      formData.append('seed_text', pending.seedText)
     }
 
     const res = await generateOntology(formData)

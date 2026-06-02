@@ -157,19 +157,23 @@ def generate_ontology():
         additional_context = request.form.get('additional_context', '')
         include_german_sources = request.form.get('include_german_sources', '') \
             .strip().lower() in ('1', 'true', 'yes', 'on')
-        
+        # Optionaler Seed-Text (z. B. strukturierte Beschreibung aus dem Onboarding-Assistenten)
+        seed_text = request.form.get('seed_text', '').strip()
+
         logger.debug(f"项目名称: {project_name}")
         logger.debug(f"模拟需求: {simulation_requirement[:100]}...")
-        
+
         if not simulation_requirement:
             return jsonify({
                 "success": False,
                 "error": t('api.requireSimulationRequirement')
             }), 400
-        
+
         # 获取上传的文件
         uploaded_files = request.files.getlist('files')
-        if not uploaded_files or all(not f.filename for f in uploaded_files):
+        has_files = bool(uploaded_files) and any(f.filename for f in uploaded_files)
+        # Seed-Material kann aus Dateien, einem seed_text oder den deutschen Quellen stammen
+        if not has_files and not seed_text and not include_german_sources:
             return jsonify({
                 "success": False,
                 "error": t('api.requireFileUpload')
@@ -202,6 +206,16 @@ def generate_ontology():
                 text = TextProcessor.preprocess_text(text)
                 document_texts.append(text)
                 all_text += f"\n\n=== {file_info['original_filename']} ===\n{text}"
+
+        # Seed-Text (z. B. strukturierte Beschreibung aus dem Onboarding-Assistenten)
+        if seed_text:
+            processed_seed = TextProcessor.preprocess_text(seed_text)
+            document_texts.append(processed_seed)
+            all_text += f"\n\n=== {t('api.seedTextLabel')} ===\n{processed_seed}"
+            project.files.append({
+                "filename": t('api.seedTextLabel'),
+                "size": len(processed_seed)
+            })
 
         # Opt-in: aktuelle deutsche Quellen als zusätzliches Seed-Material einbinden
         german_sources_count = 0
