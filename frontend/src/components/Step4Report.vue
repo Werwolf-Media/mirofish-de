@@ -8,7 +8,7 @@
           <!-- Report Header -->
           <div class="report-header-block">
             <div class="report-meta">
-              <span class="report-tag">Prediction Report</span>
+              <span class="report-tag">{{ $t('step4.predictionReport') }}</span>
               <span class="report-id">ID: {{ reportId || 'REF-2024-X92' }}</span>
             </div>
             <h1 class="main-title">{{ reportOutline.title }}</h1>
@@ -126,6 +126,16 @@
               </div>
             </div>
           </div>
+
+          <!-- PDF-Export - 在完成后显示 -->
+          <button v-if="isComplete" class="download-pdf-btn" @click="downloadPdf">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>{{ $t('step4.downloadPdf') }}</span>
+          </button>
 
           <!-- Next Step Button - 在完成后显示 -->
           <button v-if="isComplete" class="next-step-btn" @click="goToInteraction">
@@ -394,9 +404,10 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick, h, reactive } f
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getAgentLog, getConsoleLog } from '../api/report'
+import werwolfLogoRaw from '../assets/logo/werwolf-icon.svg?raw'
 
 const router = useRouter()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const props = defineProps({
   reportId: String,
@@ -411,6 +422,85 @@ const goToInteraction = () => {
   if (props.reportId) {
     router.push({ name: 'Interaction', params: { reportId: props.reportId } })
   }
+}
+
+// --- PDF-Export (gebrandeter Druck -> "Als PDF sichern") ---
+const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+}[c]))
+
+const PDF_STYLES = `
+  @page { margin: 22mm 18mm; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color:#1a1a1a; line-height:1.6; font-size:11pt; margin:0; }
+  .pdf-brand { display:flex; align-items:center; gap:12px; padding-bottom:10px; border-bottom:2px solid #111; margin-bottom:22px; }
+  .pdf-logo { width:34px; height:34px; flex-shrink:0; }
+  .pdf-logo svg { width:100%; height:100%; }
+  .pdf-brand-text { display:flex; flex-direction:column; line-height:1.15; }
+  .pdf-brand-title { font-weight:800; letter-spacing:1px; font-size:14pt; }
+  .pdf-brand-sub { font-size:8pt; color:#666; letter-spacing:.5px; }
+  .pdf-tag { display:inline-block; font-size:8pt; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#ff6b2c; border:1px solid #ff6b2c; border-radius:4px; padding:2px 8px; margin-bottom:10px; }
+  .pdf-title { font-size:20pt; font-weight:800; margin:6px 0 8px; line-height:1.25; }
+  .pdf-summary { font-style:italic; color:#444; margin:0 0 12px; }
+  .pdf-date { font-size:9pt; color:#777; margin-bottom:8px; }
+  .pdf-divider { border:none; border-top:1px solid #ddd; margin:14px 0 22px; }
+  .pdf-section { margin-bottom:22px; page-break-inside:avoid; }
+  .pdf-section > h2 { font-size:14pt; font-weight:700; border-left:3px solid #ff6b2c; padding-left:10px; margin:0 0 10px; }
+  .pdf-section-body { font-size:11pt; }
+  .pdf-section-body h2,.pdf-section-body h3,.pdf-section-body h4,.pdf-section-body h5 { margin:14px 0 6px; font-weight:700; line-height:1.3; }
+  .pdf-section-body p { margin:8px 0; }
+  .pdf-section-body blockquote { border-left:3px solid #ccc; margin:10px 0; padding:4px 12px; color:#555; font-style:italic; }
+  .pdf-section-body li { margin:4px 0 4px 20px; }
+  .pdf-section-body code { background:#f3f3f3; padding:1px 4px; border-radius:3px; font-family:monospace; font-size:10pt; }
+  .pdf-section-body pre { background:#f3f3f3; padding:10px; border-radius:6px; overflow:auto; }
+  .pdf-footer { margin-top:28px; padding-top:10px; border-top:1px solid #ddd; font-size:8pt; color:#999; text-align:center; }
+`
+
+const downloadPdf = () => {
+  const outline = reportOutline.value
+  if (!outline) return
+
+  const localeMap = { de: 'de-DE', zh: 'zh-CN', en: 'en-US' }
+  let dateStr = ''
+  try {
+    dateStr = new Date().toLocaleDateString(localeMap[locale.value] || 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+  } catch (e) {
+    dateStr = new Date().toLocaleDateString()
+  }
+
+  const sections = outline.sections || []
+  let sectionsHtml = ''
+  sections.forEach((section, i) => {
+    const content = generatedSections.value[i + 1]
+    if (!content) return
+    sectionsHtml += `<section class="pdf-section"><h2>${escapeHtml(section.title)}</h2><div class="pdf-section-body">${renderMarkdown(content)}</div></section>`
+  })
+
+  const docTitle = outline.title || 'MiroFish'
+  const idLine = props.reportId ? ' · ID: ' + escapeHtml(props.reportId) : ''
+  const logoSvg = werwolfLogoRaw.replace(/<\?xml[\s\S]*?\?>/, '').replace(/<!DOCTYPE[\s\S]*?>/, '').trim()
+  const html = `<!doctype html><html lang="${escapeHtml(locale.value)}"><head><meta charset="utf-8"><title>${escapeHtml(docTitle)}</title><style>${PDF_STYLES}</style></head><body>` +
+    `<header class="pdf-brand"><div class="pdf-logo">${logoSvg}</div>` +
+    `<div class="pdf-brand-text"><span class="pdf-brand-title">MIROFISH</span><span class="pdf-brand-sub">by Werwolf Media</span></div></header>` +
+    `<div class="pdf-tag">${escapeHtml(t('step4.predictionReport'))}</div>` +
+    `<h1 class="pdf-title">${escapeHtml(docTitle)}</h1>` +
+    (outline.summary ? `<p class="pdf-summary">${escapeHtml(outline.summary)}</p>` : '') +
+    `<div class="pdf-date">${escapeHtml(t('step4.pdfGeneratedOn', { date: dateStr }))}${idLine}</div>` +
+    `<hr class="pdf-divider"/>` +
+    sectionsHtml +
+    `<footer class="pdf-footer">${escapeHtml(t('step4.pdfFooter'))}</footer>` +
+    `</body></html>`
+
+  const win = window.open('', '_blank')
+  if (!win) {
+    addLog(t('step4.downloadPdf') + ': Popup blockiert')
+    return
+  }
+  win.document.open()
+  win.document.write(html)
+  win.document.close()
+  win.focus()
+  setTimeout(() => { try { win.print() } catch (e) {} }, 350)
 }
 
 // State
@@ -3431,6 +3521,32 @@ watch(() => props.reportId, (newId) => {
 
 .next-step-btn:hover svg {
   transform: translateX(4px);
+}
+
+.download-pdf-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: calc(100% - 40px);
+  margin: 12px 20px 0 20px;
+  padding: 13px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F2937;
+  background: #FFFFFF;
+  border: 1.5px solid #ff6b2c;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.download-pdf-btn:hover {
+  background: #fff4ee;
+}
+
+.download-pdf-btn svg {
+  color: #ff6b2c;
 }
 
 /* Workflow Empty */

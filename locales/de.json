@@ -314,7 +314,11 @@
     "actionComplete": "Abgeschlossen",
     "finalizing": "Wird abgeschlossen",
     "interviewer": "Interviewer",
-    "agent": "Agent"
+    "agent": "Agent",
+    "predictionReport": "Prognosebericht",
+    "downloadPdf": "Als PDF herunterladen",
+    "pdfGeneratedOn": "Erstellt am {date}",
+    "pdfFooter": "Erstellt mit MiroFish · Werwolf Media"
   },
   "step5": {
     "interactiveTools": "Interaktive Werkzeuge",

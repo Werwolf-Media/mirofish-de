@@ -314,7 +314,11 @@
     "actionComplete": "完成",
     "finalizing": "收尾中",
     "interviewer": "采访者",
-    "agent": "受访者"
+    "agent": "受访者",
+    "predictionReport": "预测报告",
+    "downloadPdf": "下载 PDF",
+    "pdfGeneratedOn": "生成于 {date}",
+    "pdfFooter": "由 MiroFish 生成 · Werwolf Media"
   },
   "step5": {
     "interactiveTools": "Interactive Tools",
