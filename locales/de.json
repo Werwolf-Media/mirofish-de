@@ -25,7 +25,10 @@
     "items": "Einträge",
     "files": "Dateien",
     "yes": "Ja",
-    "no": "Nein"
+    "no": "Nein",
+    "systemDashboard": "SYSTEMÜBERSICHT",
+    "noProject": "KEIN_PROJEKT",
+    "noSimulation": "KEINE_SIMULATION"
   },
   "meta": {
     "title": "MiroFish – Alles vorhersagen",
@@ -88,7 +91,13 @@
     "layoutGraph": "Graph",
     "layoutSplit": "Geteilt",
     "layoutWorkbench": "Werkbank",
-    "stepNames": ["Graph-Aufbau", "Umgebung einrichten", "Simulation ausführen", "Berichtserstellung", "Tiefe Interaktion"]
+    "stepNames": [
+      "Graph-Aufbau",
+      "Umgebung einrichten",
+      "Simulation ausführen",
+      "Berichtserstellung",
+      "Tiefe Interaktion"
+    ]
   },
   "step1": {
     "ontologyGeneration": "Ontologie-Generierung",
@@ -108,7 +117,12 @@
     "creating": "Wird erstellt ...",
     "enterEnvSetup": "Zur Umgebungseinrichtung",
     "createSimulationFailed": "Simulation konnte nicht erstellt werden: {error}",
-    "createSimulationException": "Fehler bei der Simulationserstellung: {error}"
+    "createSimulationException": "Fehler bei der Simulationserstellung: {error}",
+    "attributes": "ATTRIBUTE",
+    "examples": "BEISPIELE",
+    "connections": "VERBINDUNGEN",
+    "generatedEntityTypes": "GENERIERTE ENTITY-TYPEN",
+    "generatedRelationTypes": "GENERIERTE BEZIEHUNGSTYPEN"
   },
   "step2": {
     "simInstanceInit": "Initialisierung der Simulationsinstanz",
@@ -218,7 +232,14 @@
     "forceStopSuccess": "Simulation erzwungen gestoppt",
     "forceStopFailed": "Erzwungenes Stoppen fehlgeschlagen: {error}",
     "startGenerateReportBtn": "Bericht generieren",
-    "generatingReportBtn": "Wird gestartet ..."
+    "generatingReportBtn": "Wird gestartet ...",
+    "statRound": "RUNDE",
+    "statTime": "ZEIT",
+    "statActs": "AKTIONEN",
+    "availableActions": "Verfügbare Aktionen",
+    "simulationMonitor": "SIMULATIONS-MONITOR",
+    "platformInfoPlaza": "Info-Plaza",
+    "platformTopicCommunity": "Themen-Community"
   },
   "step4": {
     "generatingSection": "{title} wird generiert ...",
@@ -714,5 +735,19 @@
     "llmSelectAgentFailed": "LLM-Agentenauswahl fehlgeschlagen, Standardauswahl wird verwendet: {error}",
     "generateInterviewQuestionsFailed": "Generierung der Interviewfragen fehlgeschlagen: {error}",
     "generateInterviewSummaryFailed": "Generierung der Interviewzusammenfassung fehlgeschlagen: {error}"
+  },
+  "actions": {
+    "post": "BEITRAG",
+    "like": "LIKE",
+    "repost": "REPOST",
+    "quote": "ZITAT",
+    "follow": "FOLGEN",
+    "idle": "INAKTIV",
+    "comment": "KOMMENTAR",
+    "dislike": "DISLIKE",
+    "search": "SUCHE",
+    "trend": "TREND",
+    "mute": "STUMM",
+    "refresh": "AKTUALISIEREN"
   }
 }

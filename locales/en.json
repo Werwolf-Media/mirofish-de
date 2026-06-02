@@ -25,7 +25,10 @@
     "items": "items",
     "files": "files",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "systemDashboard": "SYSTEM DASHBOARD",
+    "noProject": "NO_PROJECT",
+    "noSimulation": "NO_SIMULATION"
   },
   "meta": {
     "title": "MiroFish - Predict Everything",
@@ -88,7 +91,13 @@
     "layoutGraph": "Graph",
     "layoutSplit": "Split",
     "layoutWorkbench": "Workbench",
-    "stepNames": ["Graph Build", "Env Setup", "Run Simulation", "Report Generation", "Deep Interaction"]
+    "stepNames": [
+      "Graph Build",
+      "Env Setup",
+      "Run Simulation",
+      "Report Generation",
+      "Deep Interaction"
+    ]
   },
   "step1": {
     "ontologyGeneration": "Ontology Generation",
@@ -108,7 +117,12 @@
     "creating": "Creating...",
     "enterEnvSetup": "Enter Environment Setup",
     "createSimulationFailed": "Failed to create simulation: {error}",
-    "createSimulationException": "Simulation creation error: {error}"
+    "createSimulationException": "Simulation creation error: {error}",
+    "attributes": "ATTRIBUTES",
+    "examples": "EXAMPLES",
+    "connections": "CONNECTIONS",
+    "generatedEntityTypes": "GENERATED ENTITY TYPES",
+    "generatedRelationTypes": "GENERATED RELATION TYPES"
   },
   "step2": {
     "simInstanceInit": "Simulation Instance Initialization",
@@ -218,7 +232,14 @@
     "forceStopSuccess": "Simulation force stopped",
     "forceStopFailed": "Force stop failed: {error}",
     "startGenerateReportBtn": "Generate Report",
-    "generatingReportBtn": "Starting..."
+    "generatingReportBtn": "Starting...",
+    "statRound": "ROUND",
+    "statTime": "TIME",
+    "statActs": "ACTS",
+    "availableActions": "Available Actions",
+    "simulationMonitor": "SIMULATION MONITOR",
+    "platformInfoPlaza": "Info Plaza",
+    "platformTopicCommunity": "Topic Community"
   },
   "step4": {
     "generatingSection": "Generating {title}...",
@@ -714,5 +735,19 @@
     "llmSelectAgentFailed": "LLM agent selection failed, using default selection: {error}",
     "generateInterviewQuestionsFailed": "Failed to generate interview questions: {error}",
     "generateInterviewSummaryFailed": "Failed to generate interview summary: {error}"
+  },
+  "actions": {
+    "post": "POST",
+    "like": "LIKE",
+    "repost": "REPOST",
+    "quote": "QUOTE",
+    "follow": "FOLLOW",
+    "idle": "IDLE",
+    "comment": "COMMENT",
+    "dislike": "DISLIKE",
+    "search": "SEARCH",
+    "trend": "TREND",
+    "mute": "MUTE",
+    "refresh": "REFRESH"
   }
 }
