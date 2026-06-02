@@ -807,5 +807,23 @@
     "promptTimeframe": "Time horizon",
     "promptVariables": "Variables to test",
     "promptInstruction": "Simulate how the stated audience reacts over the stated period and answer the prediction question. Consider sentiment, key arguments, opinion dynamics and possible turning points."
+  },
+  "aiOnboarding": {
+    "launchTitle": "AI assistant",
+    "launchSubtitle": "Reach the optimal input via conversation",
+    "title": "AI onboarding assistant",
+    "greeting": "Describe your idea in a few words — I will ask a couple of questions and turn it into the optimal simulation input. You can also attach a document.",
+    "inputPlaceholder": "Your answer…",
+    "send": "Send",
+    "thinking": "The assistant is thinking…",
+    "attachDoc": "Attach document",
+    "reviewTitle": "Generated input — review & adjust",
+    "requirementLabel": "Simulation prompt",
+    "seedTextLabel": "Seed document (actors, background, numbers)",
+    "backToChat": "Back to conversation",
+    "materialLabel": "Optional: add documents",
+    "uploadHint": "Add document (PDF, MD, TXT)",
+    "start": "Start simulation",
+    "errorGeneric": "The assistant is currently unavailable. Please try again."
   }
 }

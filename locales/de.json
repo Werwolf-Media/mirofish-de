@@ -807,5 +807,23 @@
     "promptTimeframe": "Zeithorizont",
     "promptVariables": "Zu testende Variablen",
     "promptInstruction": "Simuliere, wie die genannte Zielgruppe im genannten Zeitraum reagiert, und beantworte die Prognosefrage. Berücksichtige Stimmung, zentrale Argumente, Meinungsdynamik und mögliche Wendepunkte."
+  },
+  "aiOnboarding": {
+    "launchTitle": "KI-Assistent",
+    "launchSubtitle": "Im Gespräch zum optimalen Input",
+    "title": "KI-Onboarding-Assistent",
+    "greeting": "Beschreiben Sie Ihre Idee in wenigen Worten – ich stelle ein paar Rückfragen und mache daraus den optimalen Simulations-Input. Sie können auch ein Dokument anhängen.",
+    "inputPlaceholder": "Ihre Antwort …",
+    "send": "Senden",
+    "thinking": "Der Assistent denkt nach …",
+    "attachDoc": "Dokument anhängen",
+    "reviewTitle": "Generierter Input – prüfen & anpassen",
+    "requirementLabel": "Simulations-Prompt",
+    "seedTextLabel": "Seed-Dokument (Akteure, Hintergrund, Zahlen)",
+    "backToChat": "Zurück zum Gespräch",
+    "materialLabel": "Optional: Dokumente hinzufügen",
+    "uploadHint": "Dokument hinzufügen (PDF, MD, TXT)",
+    "start": "Simulation starten",
+    "errorGeneric": "Der Assistent ist gerade nicht erreichbar. Bitte erneut versuchen."
   }
 }

@@ -131,6 +131,16 @@
         <!-- 右栏：交互控制台 -->
         <div class="right-panel">
           <div class="console-box">
+            <!-- KI-Assistent (dialogbasierter Input) -->
+            <button class="wizard-launch wizard-launch--ai" @click="showAIWizard = true" :disabled="loading">
+              <span class="wizard-launch-icon">🤖</span>
+              <span class="wizard-launch-text">
+                <span class="wizard-launch-title">{{ $t('aiOnboarding.launchTitle') }}</span>
+                <span class="wizard-launch-sub">{{ $t('aiOnboarding.launchSubtitle') }}</span>
+              </span>
+              <span class="wizard-launch-arrow">→</span>
+            </button>
+
             <!-- Onboarding-Assistent (geführter Input) -->
             <button class="wizard-launch" @click="showWizard = true" :disabled="loading">
               <span class="wizard-launch-icon">✨</span>
@@ -235,8 +245,9 @@
       <HistoryDatabase />
     </div>
 
-    <!-- Onboarding-Assistent -->
+    <!-- Onboarding-Assistenten -->
     <OnboardingWizard v-if="showWizard" @close="showWizard = false" @submit="onWizardSubmit" />
+    <AIOnboardingWizard v-if="showAIWizard" @close="showAIWizard = false" @submit="onWizardSubmit" />
   </div>
 </template>
 
@@ -246,16 +257,19 @@ import { useRouter } from 'vue-router'
 import HistoryDatabase from '../components/HistoryDatabase.vue'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 import OnboardingWizard from '../components/OnboardingWizard.vue'
+import AIOnboardingWizard from '../components/AIOnboardingWizard.vue'
 import { logout } from '../store/auth'
 
 const router = useRouter()
 
 const handleLogout = () => logout()
 
-// Onboarding-Assistent
+// Onboarding-Assistenten (strukturiert + KI)
 const showWizard = ref(false)
+const showAIWizard = ref(false)
 const onWizardSubmit = (payload) => {
   showWizard.value = false
+  showAIWizard.value = false
   import('../store/pendingUpload.js').then(({ setPendingUpload }) => {
     setPendingUpload(payload.files, payload.requirement, payload.includeGermanSources, payload.seedText)
     router.push({ name: 'Process', params: { projectId: 'new' } })
@@ -787,6 +801,9 @@ const startSimulation = () => {
 .wizard-launch-title { font-weight: 700; font-size: 0.92rem; letter-spacing: 0.3px; }
 .wizard-launch-sub { font-size: 0.72rem; opacity: 0.7; }
 .wizard-launch-arrow { font-size: 16px; opacity: 0.8; }
+
+.wizard-launch--ai { background: #ff6b2c; }
+.wizard-launch--ai:hover:not(:disabled) { opacity: 0.92; }
 
 .console-section {
   padding: 20px;

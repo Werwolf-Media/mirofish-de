@@ -34,6 +34,11 @@ class Config:
     LLM_API_KEY = os.environ.get('LLM_API_KEY')
     LLM_BASE_URL = os.environ.get('LLM_BASE_URL', 'https://api.openai.com/v1')
     LLM_MODEL_NAME = os.environ.get('LLM_MODEL_NAME', 'gpt-4o-mini')
+
+    # Modell für den KI-Onboarding-Assistenten (stärkeres Modell für bessere
+    # Prompt-Generierung). Gleicher OpenRouter-Key/-Base-URL; Fallback: LLM_MODEL_NAME.
+    WIZARD_MODEL_NAME = os.environ.get('WIZARD_MODEL_NAME') \
+        or os.environ.get('LLM_MODEL_NAME', 'anthropic/claude-3.5-sonnet')
     
     # Zep配置
     ZEP_API_KEY = os.environ.get('ZEP_API_KEY')

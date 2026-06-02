@@ -807,5 +807,23 @@
     "promptTimeframe": "时间范围",
     "promptVariables": "要测试的变量",
     "promptInstruction": "模拟所述受众在所述时间内的反应，并回答预测问题。考虑情绪、核心论点、观点动态及可能的转折点。"
+  },
+  "aiOnboarding": {
+    "launchTitle": "AI 助手",
+    "launchSubtitle": "通过对话获得最佳输入",
+    "title": "AI 引导助手",
+    "greeting": "用几句话描述您的想法——我会提几个问题，并将其转化为最佳的模拟输入。您也可以附加一个文档。",
+    "inputPlaceholder": "您的回答……",
+    "send": "发送",
+    "thinking": "助手正在思考……",
+    "attachDoc": "附加文档",
+    "reviewTitle": "已生成输入——检查并调整",
+    "requirementLabel": "模拟提示词",
+    "seedTextLabel": "种子文档（角色、背景、数据）",
+    "backToChat": "返回对话",
+    "materialLabel": "可选：添加文档",
+    "uploadHint": "添加文档（PDF, MD, TXT）",
+    "start": "开始模拟",
+    "errorGeneric": "助手当前不可用，请重试。"
   }
 }
