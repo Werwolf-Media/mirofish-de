@@ -10,6 +10,7 @@ Zep检索工具服务
 
 import time
 import json
+import re
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 
@@ -430,6 +431,8 @@ class ZepToolsService:
         self.client = Zep(api_key=self.api_key)
         # LLM客户端用于InsightForge生成子问题
         self._llm_client = llm_client
+        # Cache für all_nodes pro graph_id (spart Zep-API-Calls bei Rate-Limit)
+        self._all_nodes_cache: Dict[str, List["NodeInfo"]] = {}
         logger.info(t("console.zepToolsInitialized"))
     
     @property
@@ -439,27 +442,53 @@ class ZepToolsService:
             self._llm_client = LLMClient()
         return self._llm_client
     
+    @staticmethod
+    def _extract_retry_after(e) -> Optional[float]:
+        """retry-after (Sekunden) aus einer Zep-429-Antwort lesen, falls vorhanden."""
+        headers = getattr(e, 'headers', None)
+        if headers:
+            try:
+                val = headers.get('retry-after')
+                if val:
+                    return float(val)
+            except Exception:
+                pass
+        m = re.search(r"'retry-after':\s*'?(\d+)'?", str(e))
+        if m:
+            return float(m.group(1))
+        return None
+
     def _call_with_retry(self, func, operation_name: str, max_retries: int = None):
-        """带重试机制的API调用"""
+        """带重试机制的API调用（尊重 Zep 的 retry-after 速率限制头）"""
         max_retries = max_retries or self.MAX_RETRIES
         last_exception = None
         delay = self.RETRY_DELAY
-        
+
         for attempt in range(max_retries):
             try:
                 return func()
             except Exception as e:
                 last_exception = e
                 if attempt < max_retries - 1:
+                    # Bei Rate-Limit (429) das vom Server angegebene retry-after nutzen
+                    retry_after = self._extract_retry_after(e)
+                    wait = retry_after if retry_after is not None else delay
+                    wait = min(wait, 30.0)  # Deckel gegen sehr lange Wartezeiten
                     logger.warning(
-                        t("console.zepRetryAttempt", operation=operation_name, attempt=attempt + 1, error=str(e)[:100], delay=f"{delay:.1f}")
+                        t("console.zepRetryAttempt", operation=operation_name, attempt=attempt + 1, error=str(e)[:100], delay=f"{wait:.1f}")
                     )
-                    time.sleep(delay)
+                    time.sleep(wait)
                     delay *= 2
                 else:
                     logger.error(t("console.zepAllRetriesFailed", operation=operation_name, retries=max_retries, error=str(e)))
-        
+
         raise last_exception
+
+    def _get_all_nodes_cached(self, graph_id: str) -> List["NodeInfo"]:
+        """all_nodes pro graph_id cachen — vermeidet viele Einzel-API-Calls (Rate-Limit)."""
+        if graph_id not in self._all_nodes_cache:
+            self._all_nodes_cache[graph_id] = self.get_all_nodes(graph_id)
+        return self._all_nodes_cache[graph_id]
     
     def search_graph(
         self, 
@@ -1034,16 +1063,18 @@ class ZepToolsService:
                 if target_uuid:
                     entity_uuids.add(target_uuid)
         
-        # 获取所有相关实体的详情（不限制数量，完整输出）
+        # 获取所有相关实体的详情：用一次 all_nodes 批量查询替代逐个 API 调用
+        # （Zep 免费套餐限速 5 次/分钟，逐个请求会触发 429）
         entity_insights = []
         node_map = {}  # 用于后续关系链构建
-        
+        all_node_lookup = {n.uuid: n for n in self._get_all_nodes_cached(graph_id)}
+
         for uuid in list(entity_uuids):  # 处理所有实体，不截断
             if not uuid:
                 continue
             try:
-                # 单独获取每个相关节点的信息
-                node = self.get_node_detail(uuid)
+                # 从批量结果中查找节点（不再为每个节点单独请求）
+                node = all_node_lookup.get(uuid)
                 if node:
                     node_map[uuid] = node
                     entity_type = next((l for l in node.labels if l not in ["Entity", "Node"]), "实体")
