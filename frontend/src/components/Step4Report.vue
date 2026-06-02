@@ -93,11 +93,11 @@
               <span class="metric-value mono">{{ completedSections }}/{{ totalSections }}</span>
             </div>
             <div class="metric">
-              <span class="metric-label">Elapsed</span>
+              <span class="metric-label">{{ $t('step4.metricElapsed') }}</span>
               <span class="metric-value mono">{{ formatElapsedTime }}</span>
             </div>
             <div class="metric">
-              <span class="metric-label">Tools</span>
+              <span class="metric-label">{{ $t('step4.metricTools') }}</span>
               <span class="metric-value mono">{{ totalToolCalls }}</span>
             </div>
             <div class="metric metric-right">
@@ -307,12 +307,12 @@
                   <!-- LLM Response -->
                   <template v-if="log.action === 'llm_response'">
                     <div class="llm-meta">
-                      <span class="meta-tag">Iteration {{ log.details?.iteration }}</span>
+                      <span class="meta-tag">{{ $t('step4.iteration') }} {{ log.details?.iteration }}</span>
                       <span class="meta-tag" :class="{ active: log.details?.has_tool_calls }">
-                        Tools: {{ log.details?.has_tool_calls ? 'Yes' : 'No' }}
+                        {{ $t('step4.toolsLabel') }}: {{ log.details?.has_tool_calls ? $t('common.yes') : $t('common.no') }}
                       </span>
                       <span class="meta-tag" :class="{ active: log.details?.has_final_answer, 'final-answer': log.details?.has_final_answer }">
-                        Final: {{ log.details?.has_final_answer ? 'Yes' : 'No' }}
+                        {{ $t('step4.finalLabel') }}: {{ log.details?.has_final_answer ? $t('common.yes') : $t('common.no') }}
                       </span>
                     </div>
                     <!-- 当是最终答案时，显示特殊提示 -->
@@ -320,7 +320,7 @@
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
-                      <span>Section "{{ log.section_title }}" content generated</span>
+                      <span>{{ $t('step4.sectionContentGenerated', { title: log.section_title }) }}</span>
                     </div>
                     <div v-if="expandedLogs.has(log.timestamp) && log.details?.response" class="llm-content">
                       <pre>{{ log.details.response }}</pre>
@@ -334,7 +334,7 @@
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                         <polyline points="22 4 12 14.01 9 11.01"></polyline>
                       </svg>
-                      <span>Report Generation Complete</span>
+                      <span>{{ $t('step4.reportGenerationComplete') }}</span>
                     </div>
                   </template>
                 </div>
@@ -347,17 +347,17 @@
                   <div class="footer-actions">
                     <!-- Tool Call: Show/Hide Params -->
                     <button v-if="log.action === 'tool_call' && log.details?.parameters" class="action-btn" @click.stop="toggleLogExpand(log)">
-                      {{ expandedLogs.has(log.timestamp) ? 'Hide Params' : 'Show Params' }}
+                      {{ expandedLogs.has(log.timestamp) ? $t('step4.hideParams') : $t('step4.showParams') }}
                     </button>
                     
                     <!-- Tool Result: Raw/Structured View -->
                     <button v-if="log.action === 'tool_result'" class="action-btn" @click.stop="toggleRawResult(log.timestamp, $event)">
-                      {{ showRawResult[log.timestamp] ? 'Structured View' : 'Raw Output' }}
+                      {{ showRawResult[log.timestamp] ? $t('step4.structuredView') : $t('step4.rawOutput') }}
                     </button>
                     
                     <!-- LLM Response: Show/Hide Response -->
                     <button v-if="log.action === 'llm_response' && log.details?.response" class="action-btn" @click.stop="toggleLogExpand(log)">
-                      {{ expandedLogs.has(log.timestamp) ? 'Hide Response' : 'Show Response' }}
+                      {{ expandedLogs.has(log.timestamp) ? $t('step4.hideResponse') : $t('step4.showResponse') }}
                     </button>
                   </div>
                 </div>
@@ -377,8 +377,8 @@
     <!-- Bottom Console Logs -->
     <div class="console-logs">
       <div class="log-header">
-        <span class="log-title">CONSOLE OUTPUT</span>
-        <span class="log-id">{{ reportId || 'NO_REPORT' }}</span>
+        <span class="log-title">{{ $t('step4.consoleOutput') }}</span>
+        <span class="log-id">{{ reportId || $t('step4.noReport') }}</span>
       </div>
       <div class="log-content" ref="logContent">
         <div class="log-line" v-for="(log, idx) in consoleLogs" :key="idx">
@@ -1278,6 +1278,7 @@ const PanoramaDisplay = {
 const InterviewDisplay = {
   props: ['result', 'resultLength'],
   setup(props) {
+    const { t } = useI18n()
     // Format result size for display
     const formatSize = (length) => {
       if (!length) return ''
@@ -1494,7 +1495,7 @@ const InterviewDisplay = {
               h('div', { class: 'qa-question' }, [
                 h('div', { class: 'qa-badge q-badge' }, `Q${qIdx + 1}`),
                 h('div', { class: 'qa-content' }, [
-                  h('div', { class: 'qa-sender' }, 'Interviewer'),
+                  h('div', { class: 'qa-sender' }, t('step4.interviewer')),
                   h('div', { class: 'qa-text' }, question)
                 ])
               ]),
@@ -1504,7 +1505,7 @@ const InterviewDisplay = {
                 h('div', { class: 'qa-badge a-badge' }, `A${qIdx + 1}`),
                 h('div', { class: 'qa-content' }, [
                   h('div', { class: 'qa-answer-header' }, [
-                    h('div', { class: 'qa-sender' }, interview?.name || 'Agent'),
+                    h('div', { class: 'qa-sender' }, interview?.name || t('step4.agent')),
                     // 双平台切换按钮（仅在有真实双平台回答时显示）
                     hasDualPlatform && h('div', { class: 'platform-switch' }, [
                       h('button', {
@@ -1550,7 +1551,7 @@ const InterviewDisplay = {
         
         // Key Quotes Section
         props.result.interviews[activeIndex.value]?.quotes?.length > 0 && h('div', { class: 'quotes-section' }, [
-          h('div', { class: 'quotes-header' }, 'Key Quotes'),
+          h('div', { class: 'quotes-header' }, t('step4.keyQuotes')),
           h('div', { class: 'quotes-list' },
             props.result.interviews[activeIndex.value].quotes.slice(0, 3).map((quote, qi) => {
               const cleanedQuote = cleanQuoteText(quote)
@@ -1567,7 +1568,7 @@ const InterviewDisplay = {
 
       // Summary Section (Collapsible)
       props.result.summary && h('div', { class: 'summary-section' }, [
-        h('div', { class: 'summary-header' }, 'Interview Summary'),
+        h('div', { class: 'summary-header' }, t('step4.interviewSummary')),
         h('div', { 
           class: 'summary-content',
           innerHTML: renderMarkdown(props.result.summary.length > 500 ? props.result.summary.substring(0, 500) + '...' : props.result.summary)
@@ -1781,7 +1782,7 @@ const activeStep = computed(() => {
   if (doneSteps.length > 0) return doneSteps[doneSteps.length - 1]
   
   // 否则返回第一个步骤
-  return steps[0] || { noLabel: '--', title: '等待开始', status: 'todo', meta: '' }
+  return steps[0] || { noLabel: '--', title: t('step4.waitingToStart'), status: 'todo', meta: '' }
 })
 
 const workflowSteps = computed(() => {
@@ -1792,9 +1793,9 @@ const workflowSteps = computed(() => {
   steps.push({
     key: 'planning',
     noLabel: 'PL',
-    title: 'Planning / Outline',
+    title: t('step4.planningOutline'),
     status: planningStatus,
-    meta: planningStatus === 'active' ? 'IN PROGRESS' : ''
+    meta: planningStatus === 'active' ? t('step4.inProgress') : ''
   })
 
   // Sections (if outline exists)
@@ -1810,7 +1811,7 @@ const workflowSteps = computed(() => {
       noLabel: String(idx).padStart(2, '0'),
       title: section.title,
       status,
-      meta: status === 'active' ? 'IN PROGRESS' : ''
+      meta: status === 'active' ? t('step4.inProgress') : ''
     })
   })
 
@@ -1819,9 +1820,9 @@ const workflowSteps = computed(() => {
   steps.push({
     key: 'complete',
     noLabel: 'OK',
-    title: 'Complete',
+    title: t('step4.actionComplete'),
     status: completeStatus,
-    meta: completeStatus === 'active' ? 'FINALIZING' : ''
+    meta: completeStatus === 'active' ? t('step4.finalizing') : ''
   })
 
   return steps
@@ -1996,16 +1997,16 @@ const getConnectorClass = (log, idx, total) => {
 
 const getActionLabel = (action) => {
   const labels = {
-    'report_start': 'Report Started',
-    'planning_start': 'Planning',
-    'planning_complete': 'Plan Complete',
-    'section_start': 'Section Start',
-    'section_content': 'Content Ready',
-    'section_complete': 'Section Done',
-    'tool_call': 'Tool Call',
-    'tool_result': 'Tool Result',
-    'llm_response': 'LLM Response',
-    'report_complete': 'Complete'
+    'report_start': t('step4.actionReportStart'),
+    'planning_start': t('step4.actionPlanning'),
+    'planning_complete': t('step4.actionPlanComplete'),
+    'section_start': t('step4.actionSectionStart'),
+    'section_content': t('step4.actionContentReady'),
+    'section_complete': t('step4.actionSectionDone'),
+    'tool_call': t('step4.actionToolCall'),
+    'tool_result': t('step4.actionToolResult'),
+    'llm_response': t('step4.actionLlmResponse'),
+    'report_complete': t('step4.actionComplete')
   }
   return labels[action] || action
 }
