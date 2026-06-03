@@ -825,5 +825,31 @@
     "uploadHint": "Add document (PDF, MD, TXT)",
     "start": "Start simulation",
     "errorGeneric": "The assistant is currently unavailable. Please try again."
+  },
+  "share": {
+    "button": "Share",
+    "title": "Share results link",
+    "link": "Individual link",
+    "copy": "Copy",
+    "copied": "Copied",
+    "active": "Active",
+    "inactive": "Deactivated",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "usage": "{count} / {limit} messages",
+    "reset": "Reset counter",
+    "generating": "Generating link…"
+  },
+  "shared": {
+    "reportAgent": "Report Agent",
+    "individualAgent": "Individual agent",
+    "selectAgent": "Select an agent…",
+    "inputPlaceholder": "Ask a question…",
+    "send": "Send",
+    "thinking": "Thinking…",
+    "invalid": "This link is invalid.",
+    "revoked": "This link has been deactivated by the owner.",
+    "limitReached": "Message limit reached — please contact the owner.",
+    "poweredBy": "Powered by MiroFish · Werwolf Media"
   }
 }

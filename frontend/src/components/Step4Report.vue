@@ -137,6 +137,15 @@
             <span>{{ $t('step4.downloadPdf') }}</span>
           </button>
 
+          <!-- Teilen-Button - 在完成后显示 -->
+          <button v-if="isComplete" class="download-pdf-btn" @click="openShare">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.6" y1="13.5" x2="15.4" y2="17.5"></line><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"></line>
+            </svg>
+            <span>{{ $t('share.button') }}</span>
+          </button>
+
           <!-- Next Step Button - 在完成后显示 -->
           <button v-if="isComplete" class="next-step-btn" @click="goToInteraction">
             <span>{{ $t('step4.goToInteraction') }}</span>
@@ -396,6 +405,38 @@
         </div>
       </div>
     </div>
+
+    <!-- Teilen-Dialog -->
+    <div v-if="showShareDialog" class="share-overlay" @click.self="showShareDialog = false">
+      <div class="share-modal">
+        <div class="share-modal-head">
+          <span>{{ $t('share.title') }}</span>
+          <button class="share-x" @click="showShareDialog = false">×</button>
+        </div>
+        <div v-if="shareLoading" class="share-loading">{{ $t('share.generating') }}</div>
+        <template v-else-if="shareData">
+          <label class="share-field-label">{{ $t('share.link') }}</label>
+          <div class="share-link-row">
+            <input class="share-link-input" :value="shareUrl" readonly @focus="$event.target.select()" />
+            <button class="share-copy" @click="copyLink">{{ copied ? $t('share.copied') : $t('share.copy') }}</button>
+          </div>
+
+          <div class="share-status-row">
+            <span class="share-status" :class="shareData.active ? 'on' : 'off'">
+              {{ shareData.active ? $t('share.active') : $t('share.inactive') }}
+            </span>
+            <button class="share-toggle" @click="toggleActive">
+              {{ shareData.active ? $t('share.deactivate') : $t('share.activate') }}
+            </button>
+          </div>
+
+          <div class="share-usage-row">
+            <span>{{ $t('share.usage', { count: shareData.message_count, limit: shareData.message_limit }) }}</span>
+            <button class="share-reset" @click="resetUsage">{{ $t('share.reset') }}</button>
+          </div>
+        </template>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -404,6 +445,7 @@ import { ref, computed, watch, onMounted, onUnmounted, nextTick, h, reactive } f
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getAgentLog, getConsoleLog } from '../api/report'
+import { createShare, deactivateShare, activateShare, resetShare } from '../api/share'
 import werwolfLogoRaw from '../assets/logo/werwolf-icon.svg?raw'
 
 const router = useRouter()
@@ -422,6 +464,52 @@ const goToInteraction = () => {
   if (props.reportId) {
     router.push({ name: 'Interaction', params: { reportId: props.reportId } })
   }
+}
+
+// --- Teilen (individueller Link) ---
+const showShareDialog = ref(false)
+const shareLoading = ref(false)
+const shareData = ref(null)
+const copied = ref(false)
+const shareUrl = computed(() => shareData.value ? `${window.location.origin}/share/${shareData.value.token}` : '')
+
+const openShare = async () => {
+  if (!props.reportId) return
+  showShareDialog.value = true
+  copied.value = false
+  if (shareData.value) return
+  shareLoading.value = true
+  try {
+    const res = await createShare(props.reportId)
+    shareData.value = res.data
+  } catch (e) {
+    addLog('Teilen fehlgeschlagen: ' + (e.message || e))
+  } finally {
+    shareLoading.value = false
+  }
+}
+const copyLink = async () => {
+  try {
+    await navigator.clipboard.writeText(shareUrl.value)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 1500)
+  } catch (e) { /* clipboard nicht verfügbar */ }
+}
+const toggleActive = async () => {
+  if (!shareData.value) return
+  try {
+    const res = shareData.value.active
+      ? await deactivateShare(shareData.value.token)
+      : await activateShare(shareData.value.token)
+    shareData.value = res.data
+  } catch (e) { /* ignore */ }
+}
+const resetUsage = async () => {
+  if (!shareData.value) return
+  try {
+    const res = await resetShare(shareData.value.token)
+    shareData.value = res.data
+  } catch (e) { /* ignore */ }
 }
 
 // --- PDF-Export (gebrandeter Druck -> "Als PDF sichern") ---
@@ -3548,6 +3636,41 @@ watch(() => props.reportId, (newId) => {
 .download-pdf-btn svg {
   color: #ff6b2c;
 }
+
+/* Teilen-Dialog */
+.share-overlay {
+  position: fixed; inset: 0; z-index: 9500; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.share-modal {
+  width: 100%; max-width: 460px; background: #fff; border-radius: 12px; overflow: hidden;
+  font-family: 'JetBrains Mono', 'Space Grotesk', -apple-system, sans-serif;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.share-modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; background: #000; color: #fff; font-weight: 700;
+}
+.share-x { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; opacity: 0.7; }
+.share-x:hover { opacity: 1; }
+.share-loading { padding: 30px; text-align: center; color: #999; }
+.share-field-label { display: block; padding: 16px 18px 4px; font-size: 0.78rem; font-weight: 600; color: #555; }
+.share-link-row { display: flex; gap: 8px; padding: 0 18px; }
+.share-link-input { flex: 1; padding: 9px 11px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 0.8rem; background: #fafafa; }
+.share-copy { background: #ff6b2c; color: #fff; border: none; border-radius: 8px; padding: 0 14px; font-family: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+.share-status-row, .share-usage-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-top: 1px solid #f0f0f0; margin-top: 14px; font-size: 0.84rem;
+}
+.share-usage-row { margin-top: 0; }
+.share-status { font-weight: 700; }
+.share-status.on { color: #2f9e44; }
+.share-status.off { color: #999; }
+.share-toggle, .share-reset {
+  background: none; border: 1px solid #ddd; border-radius: 7px; padding: 6px 12px;
+  font-family: inherit; font-size: 0.78rem; cursor: pointer; color: #444;
+}
+.share-toggle:hover, .share-reset:hover { border-color: #ff6b2c; color: #ff6b2c; }
 
 /* Workflow Empty */
 .workflow-empty {

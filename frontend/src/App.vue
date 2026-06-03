@@ -1,11 +1,15 @@
 <template>
-  <LoginScreen v-if="!auth.token" />
+  <LoginScreen v-if="!auth.token && !route.meta.public" />
   <router-view v-else />
 </template>
 
 <script setup>
+import { useRoute } from 'vue-router'
 import { auth } from './store/auth'
 import LoginScreen from './components/LoginScreen.vue'
+
+// Öffentliche Routen (z. B. geteilte Links) überspringen das Login-Overlay
+const route = useRoute()
 </script>
 
 <style>

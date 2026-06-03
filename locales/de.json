@@ -825,5 +825,31 @@
     "uploadHint": "Dokument hinzufügen (PDF, MD, TXT)",
     "start": "Simulation starten",
     "errorGeneric": "Der Assistent ist gerade nicht erreichbar. Bitte erneut versuchen."
+  },
+  "share": {
+    "button": "Teilen",
+    "title": "Ergebnis-Link teilen",
+    "link": "Individueller Link",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "active": "Aktiv",
+    "inactive": "Deaktiviert",
+    "deactivate": "Deaktivieren",
+    "activate": "Aktivieren",
+    "usage": "{count} / {limit} Nachrichten",
+    "reset": "Zähler zurücksetzen",
+    "generating": "Link wird erstellt …"
+  },
+  "shared": {
+    "reportAgent": "Report Agent",
+    "individualAgent": "Einzelner Agent",
+    "selectAgent": "Agent auswählen …",
+    "inputPlaceholder": "Frage stellen …",
+    "send": "Senden",
+    "thinking": "Denkt nach …",
+    "invalid": "Dieser Link ist ungültig.",
+    "revoked": "Dieser Link wurde vom Ersteller deaktiviert.",
+    "limitReached": "Nachrichtenlimit erreicht – bitte den Ersteller kontaktieren.",
+    "poweredBy": "Bereitgestellt mit MiroFish · Werwolf Media"
   }
 }

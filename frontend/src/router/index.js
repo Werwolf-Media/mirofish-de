@@ -5,6 +5,7 @@ import SimulationView from '../views/SimulationView.vue'
 import SimulationRunView from '../views/SimulationRunView.vue'
 import ReportView from '../views/ReportView.vue'
 import InteractionView from '../views/InteractionView.vue'
+import SharedView from '../components/SharedView.vue'
 
 const routes = [
   {
@@ -41,6 +42,13 @@ const routes = [
     name: 'Interaction',
     component: InteractionView,
     props: true
+  },
+  {
+    path: '/share/:token',
+    name: 'Shared',
+    component: SharedView,
+    props: true,
+    meta: { public: true }
   }
 ]
 
