@@ -872,6 +872,9 @@
     "adminHint": "Nur für den Inhaber",
     "adminSubmit": "Anmelden",
     "adminWrong": "Falsches Admin-Passwort",
-    "adminLogout": "Abmelden"
+    "adminLogout": "Abmelden",
+    "defaultPrice": "Standardpreis für neue Runs",
+    "savePrice": "Speichern",
+    "defaultPriceHint": "Gilt für künftige Runs; bestehende behalten ihren Preis."
   }
 }

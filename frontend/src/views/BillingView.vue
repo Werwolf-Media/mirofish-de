@@ -31,6 +31,14 @@
     <div v-else class="billing-body">
       <p class="billing-sub">{{ $t('billing.subtitle') }}</p>
 
+      <div class="default-price-bar">
+        <label>{{ $t('billing.defaultPrice') }}</label>
+        <input type="number" min="0" step="1" v-model.number="defaultPrice"
+               @keydown.enter.prevent="saveDefault" class="default-price-input" /> €
+        <button class="default-price-btn" @click="saveDefault">{{ defaultSaved ? $t('share.copied') : $t('billing.savePrice') }}</button>
+        <span class="default-price-hint">{{ $t('billing.defaultPriceHint') }}</span>
+      </div>
+
       <div v-if="loading" class="billing-loading">{{ $t('common.loading') }}</div>
       <div v-else-if="rows.length === 0" class="billing-empty">{{ $t('billing.empty') }}</div>
 
@@ -102,13 +110,15 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import werwolfLogo from '../assets/logo/werwolf-icon.svg'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
-import { listBilling, updateBilling, adminLogin } from '../api/billing'
+import { listBilling, updateBilling, adminLogin, setDefaultPrice } from '../api/billing'
 
 const router = useRouter()
 const { t } = useI18n()
 
 const rows = ref([])
 const loading = ref(true)
+const defaultPrice = ref(50)
+const defaultSaved = ref(false)
 
 // Admin-Zugang (nur Inhaber)
 const adminToken = ref(localStorage.getItem('adminToken') || '')
@@ -154,11 +164,23 @@ const load = async () => {
   try {
     const res = await listBilling()
     rows.value = res.data || []
+    if (typeof res.default_billing_price_eur === 'number') defaultPrice.value = res.default_billing_price_eur
   } catch (e) {
     if (e && e.message === 'admin_required') adminLogout()
   } finally {
     loading.value = false
   }
+}
+
+const saveDefault = async () => {
+  try {
+    const res = await setDefaultPrice(Number(defaultPrice.value) || 0)
+    if (res.data && typeof res.data.default_billing_price_eur === 'number') {
+      defaultPrice.value = res.data.default_billing_price_eur
+    }
+    defaultSaved.value = true
+    setTimeout(() => { defaultSaved.value = false }, 1500)
+  } catch (e) { /* ignore */ }
 }
 
 const fmtDate = (iso) => {
@@ -231,7 +253,13 @@ onMounted(async () => {
 .admin-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .billing-body { max-width: 1200px; margin: 0 auto; padding: 24px 22px; }
-.billing-sub { color: #666; font-size: 0.88rem; margin-bottom: 18px; }
+.billing-sub { color: #666; font-size: 0.88rem; margin-bottom: 14px; }
+.default-price-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: #fff; border: 1px solid #e6e6e6; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.86rem; }
+.default-price-bar label { font-weight: 600; }
+.default-price-input { width: 70px; padding: 6px 8px; border: 1.5px solid #e0e0e0; border-radius: 6px; font-family: inherit; font-size: 0.86rem; text-align: right; }
+.default-price-input:focus { border-color: #ff6b2c; outline: none; }
+.default-price-btn { background: #ff6b2c; color: #fff; border: none; border-radius: 7px; padding: 7px 14px; font-family: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+.default-price-hint { color: #999; font-size: 0.74rem; margin-left: 6px; }
 .billing-loading, .billing-empty { color: #999; padding: 30px 0; }
 
 .billing-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e6e6e6; border-radius: 10px; overflow: hidden; font-size: 0.84rem; }

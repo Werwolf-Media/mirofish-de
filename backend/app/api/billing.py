@@ -51,7 +51,30 @@ def list_billing():
     if not _admin_ok():
         return jsonify({"success": False, "error": "admin_required"}), 401
     records = [_enrich(r) for r in BillingManager.list()]
-    return jsonify({"success": True, "data": records, "eur_per_usd": float(getattr(Config, 'EUR_PER_USD', 0.92))})
+    return jsonify({
+        "success": True,
+        "data": records,
+        "eur_per_usd": float(getattr(Config, 'EUR_PER_USD', 0.92)),
+        "default_billing_price_eur": BillingManager.default_price(),
+    })
+
+
+@billing_bp.route('/settings', methods=['GET'])
+def get_settings():
+    if not _admin_ok():
+        return jsonify({"success": False, "error": "admin_required"}), 401
+    return jsonify({"success": True, "data": BillingManager.get_settings()})
+
+
+@billing_bp.route('/settings', methods=['POST'])
+def set_settings():
+    if not _admin_ok():
+        return jsonify({"success": False, "error": "admin_required"}), 401
+    data = request.get_json(silent=True) or {}
+    if 'default_billing_price_eur' not in data:
+        return jsonify({"success": False, "error": "price_required"}), 400
+    result = BillingManager.set_default_price(data['default_billing_price_eur'])
+    return jsonify({"success": True, "data": result})
 
 
 @billing_bp.route('/<project_id>/update', methods=['POST'])

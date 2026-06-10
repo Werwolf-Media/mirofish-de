@@ -872,6 +872,9 @@
     "adminHint": "仅限所有者",
     "adminSubmit": "登录",
     "adminWrong": "管理员密码错误",
-    "adminLogout": "退出"
+    "adminLogout": "退出",
+    "defaultPrice": "新运行的默认价格",
+    "savePrice": "保存",
+    "defaultPriceHint": "适用于今后的运行；现有运行保留其价格。"
   }
 }

@@ -872,6 +872,9 @@
     "adminHint": "Owner only",
     "adminSubmit": "Sign in",
     "adminWrong": "Incorrect admin password",
-    "adminLogout": "Sign out"
+    "adminLogout": "Sign out",
+    "defaultPrice": "Default price for new runs",
+    "savePrice": "Save",
+    "defaultPriceHint": "Applies to future runs; existing runs keep their price."
   }
 }

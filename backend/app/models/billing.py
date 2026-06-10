@@ -16,10 +16,46 @@ from ..config import Config
 
 class BillingManager:
     BILLING_DIR = os.path.join(Config.UPLOAD_FOLDER, 'billing')
+    SETTINGS_FILE = '_settings.json'
 
     @classmethod
     def _ensure_dir(cls):
         os.makedirs(cls.BILLING_DIR, exist_ok=True)
+
+    # ---- Admin-Einstellungen (Standardpreis) ----
+    @classmethod
+    def _settings_path(cls) -> str:
+        return os.path.join(cls.BILLING_DIR, cls.SETTINGS_FILE)
+
+    @classmethod
+    def get_settings(cls) -> dict:
+        path = cls._settings_path()
+        default = float(getattr(Config, 'DEFAULT_BILLING_PRICE_EUR', 50.0))
+        if os.path.exists(path):
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                if isinstance(data.get('default_billing_price_eur'), (int, float)):
+                    return {"default_billing_price_eur": float(data['default_billing_price_eur'])}
+            except Exception:
+                pass
+        return {"default_billing_price_eur": default}
+
+    @classmethod
+    def default_price(cls) -> float:
+        return cls.get_settings()['default_billing_price_eur']
+
+    @classmethod
+    def set_default_price(cls, price) -> dict:
+        try:
+            price = float(price)
+        except (TypeError, ValueError):
+            price = cls.default_price()
+        price = max(0.0, min(500.0, price))
+        cls._ensure_dir()
+        with open(cls._settings_path(), 'w', encoding='utf-8') as f:
+            json.dump({"default_billing_price_eur": price}, f, ensure_ascii=False, indent=2)
+        return {"default_billing_price_eur": price}
 
     @classmethod
     def _path(cls, project_id: str) -> str:
@@ -54,7 +90,7 @@ class BillingManager:
             "status": "running",
             "created_at": datetime.now(timezone.utc).isoformat(),
             "completed_at": "",
-            "billing_price_eur": float(getattr(Config, 'DEFAULT_BILLING_PRICE_EUR', 50.0)),
+            "billing_price_eur": cls.default_price(),
             "cost_usd": 0.0,
             "usage_start": None,
             "usage_end": None,
@@ -74,7 +110,7 @@ class BillingManager:
                 "project_id": project_id, "project_name": "", "requirement": "",
                 "simulation_id": "", "report_id": "", "status": "running",
                 "created_at": datetime.now(timezone.utc).isoformat(), "completed_at": "",
-                "billing_price_eur": float(getattr(Config, 'DEFAULT_BILLING_PRICE_EUR', 50.0)),
+                "billing_price_eur": cls.default_price(),
                 "cost_usd": 0.0, "usage_start": None, "usage_end": None,
             }
         rec["report_id"] = report_id or rec.get("report_id", "")
@@ -109,7 +145,7 @@ class BillingManager:
         cls._ensure_dir()
         out = []
         for name in os.listdir(cls.BILLING_DIR):
-            if not name.endswith('.json'):
+            if not name.endswith('.json') or name.startswith('_'):
                 continue
             try:
                 with open(os.path.join(cls.BILLING_DIR, name), 'r', encoding='utf-8') as f:

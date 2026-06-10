@@ -30,3 +30,4 @@ admin.interceptors.response.use(
 export const adminLogin = (password) => admin.post('/api/auth/admin-login', { password })
 export const listBilling = () => admin.get('/api/billing/list')
 export const updateBilling = (projectId, data) => admin.post(`/api/billing/${projectId}/update`, data)
+export const setDefaultPrice = (price) => admin.post('/api/billing/settings', { default_billing_price_eur: price })
