@@ -26,6 +26,8 @@ class Config:
 
     # Zugriffsschutz (Login). Passwort über .env (APP_PASSWORD) überschreibbar.
     APP_PASSWORD = os.environ.get('APP_PASSWORD', 'werwolf123#')
+    # Admin-Passwort (nur Inhaber) – schaltet die Abrechnung/Margen frei. UNBEDINGT in .env ändern.
+    ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'werwolf-admin#')
     
     # JSON配置 - 禁用ASCII转义，让中文直接显示（而不是 \uXXXX 格式）
     JSON_AS_ASCII = False

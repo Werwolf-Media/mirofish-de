@@ -32,3 +32,22 @@ def check_token(token: str) -> bool:
     if not isinstance(token, str) or not token:
         return False
     return hmac.compare_digest(token, expected_token())
+
+
+# ===== Admin (nur Inhaber – z. B. Abrechnung/Margen) =====
+
+def expected_admin_token() -> str:
+    raw = f"{Config.ADMIN_PASSWORD}|admin|{Config.SECRET_KEY}".encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
+
+
+def check_admin_password(password: str) -> bool:
+    if not isinstance(password, str):
+        return False
+    return hmac.compare_digest(password, Config.ADMIN_PASSWORD or "")
+
+
+def check_admin_token(token: str) -> bool:
+    if not isinstance(token, str) or not token:
+        return False
+    return hmac.compare_digest(token, expected_admin_token())

@@ -66,6 +66,9 @@ ZEP_API_KEY=HIER_ZEP_KEY_EINTRAGEN
 
 # ===== Zugriffsschutz (Login) - Passwort fuer den Login-Screen =====
 APP_PASSWORD=werwolf123#
+
+# ===== Admin (nur Inhaber) - schaltet die Abrechnung/Margen frei. BITTE aendern! =====
+ADMIN_PASSWORD=werwolf-admin#
 ENVEOF
   echo "==> .env-Vorlage angelegt."
 fi

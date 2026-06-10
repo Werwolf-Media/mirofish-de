@@ -55,9 +55,15 @@ def create_app(config_class=Config):
         if request.method == 'OPTIONS':
             return None  # CORS-Preflight durchlassen
         path = request.path or ''
-        # Öffentliche Endpunkte (kein Token nötig)
-        # Achtung: nur /api/shared/ (Empfänger) ist offen; /api/share/ (Verwaltung) bleibt geschützt.
-        if path == '/health' or path.rstrip('/') == '/api/auth/login' or path.startswith('/api/shared/'):
+        # Ohne App-Token erlaubt:
+        # - /health, Login + Admin-Login
+        # - /api/shared/ (Empfänger geteilter Links)
+        # - /api/billing/ (eigenes Admin-Token wird dort INTERN geprüft)
+        if path == '/health' \
+                or path.rstrip('/') == '/api/auth/login' \
+                or path.rstrip('/') == '/api/auth/admin-login' \
+                or path.startswith('/api/shared/') \
+                or path.startswith('/api/billing/'):
             return None
         if path.startswith('/api/'):
             token = request.headers.get('X-App-Token', '')

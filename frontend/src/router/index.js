@@ -54,7 +54,8 @@ const routes = [
   {
     path: '/billing',
     name: 'Billing',
-    component: BillingView
+    component: BillingView,
+    meta: { public: true }
   }
 ]
 

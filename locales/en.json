@@ -866,6 +866,12 @@
     "total": "Total",
     "perProject": "Per project",
     "priceHint": "Cost is an approximation in EUR (OpenRouter usage). Run one simulation at a time for accurate cost attribution. Suggested price: 25–80 €.",
-    "empty": "No runs yet."
+    "empty": "No runs yet.",
+    "footerLink": "Billing (owner)",
+    "adminTitle": "Billing – sign in",
+    "adminHint": "Owner only",
+    "adminSubmit": "Sign in",
+    "adminWrong": "Incorrect admin password",
+    "adminLogout": "Sign out"
   }
 }

@@ -7,9 +7,20 @@ from flask import request, jsonify
 from . import billing_bp
 from ..config import Config
 from ..models.billing import BillingManager
+from ..utils.auth import check_admin_token
 from ..utils.logger import get_logger
 
 logger = get_logger('mirofish.billing')
+
+
+def _admin_ok() -> bool:
+    """Abrechnung ist nur mit gültigem Admin-Token (X-Admin-Token) zugänglich."""
+    token = request.headers.get('X-Admin-Token', '')
+    if not token:
+        auth_header = request.headers.get('Authorization', '')
+        if auth_header.startswith('Bearer '):
+            token = auth_header[7:]
+    return check_admin_token(token)
 
 
 def _enrich(rec: dict) -> dict:
@@ -37,12 +48,16 @@ def _enrich(rec: dict) -> dict:
 
 @billing_bp.route('/list', methods=['GET'])
 def list_billing():
+    if not _admin_ok():
+        return jsonify({"success": False, "error": "admin_required"}), 401
     records = [_enrich(r) for r in BillingManager.list()]
     return jsonify({"success": True, "data": records, "eur_per_usd": float(getattr(Config, 'EUR_PER_USD', 0.92))})
 
 
 @billing_bp.route('/<project_id>/update', methods=['POST'])
 def update_billing(project_id: str):
+    if not _admin_ok():
+        return jsonify({"success": False, "error": "admin_required"}), 401
     data = request.get_json(silent=True) or {}
     fields = {}
     if 'project_name' in data:

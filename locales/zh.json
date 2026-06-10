@@ -866,6 +866,12 @@
     "total": "合计",
     "perProject": "按项目汇总",
     "priceHint": "成本为欧元近似值（基于 OpenRouter 用量）。为准确归集成本，请每次仅运行一个模拟。建议价格：25–80 €。",
-    "empty": "暂无运行记录。"
+    "empty": "暂无运行记录。",
+    "footerLink": "账单（所有者）",
+    "adminTitle": "账单 – 登录",
+    "adminHint": "仅限所有者",
+    "adminSubmit": "登录",
+    "adminWrong": "管理员密码错误",
+    "adminLogout": "退出"
   }
 }

@@ -12,7 +12,6 @@
         <a href="https://github.com/Werwolf-Media/mirofish-de" target="_blank" class="github-link">
           {{ $t('nav.visitGithub') }} <span class="arrow">↗</span>
         </a>
-        <button class="logout-link" @click="router.push('/billing')">{{ $t('billing.navButton') }}</button>
         <button class="logout-link" @click="handleLogout">{{ $t('login.logout') }}</button>
       </div>
     </nav>
@@ -249,6 +248,11 @@
     <!-- Onboarding-Assistenten -->
     <OnboardingWizard v-if="showWizard" @close="showWizard = false" @submit="onWizardSubmit" />
     <AIOnboardingWizard v-if="showAIWizard" @close="showAIWizard = false" @submit="onWizardSubmit" />
+
+    <!-- Dezenter Footer (Admin-Abrechnung) -->
+    <footer class="home-footer">
+      <button class="footer-admin-link" @click="router.push('/billing')">{{ $t('billing.footerLink') }}</button>
+    </footer>
   </div>
 </template>
 
@@ -805,6 +809,10 @@ const startSimulation = () => {
 
 .wizard-launch--ai { background: #ff6b2c; }
 .wizard-launch--ai:hover:not(:disabled) { opacity: 0.92; }
+
+.home-footer { text-align: center; padding: 18px 0 26px; }
+.footer-admin-link { background: none; border: none; color: #bbb; font-family: var(--font-mono); font-size: 0.72rem; cursor: pointer; letter-spacing: 0.3px; }
+.footer-admin-link:hover { color: #888; text-decoration: underline; }
 
 .console-section {
   padding: 20px;

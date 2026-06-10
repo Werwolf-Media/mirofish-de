@@ -8,11 +8,27 @@
       </div>
       <div class="billing-head-right">
         <LanguageSwitcher />
+        <button v-if="authed" class="billing-back" @click="adminLogout">{{ $t('billing.adminLogout') }}</button>
         <button class="billing-back" @click="goHome">← {{ $t('common.back') }}</button>
       </div>
     </header>
 
-    <div class="billing-body">
+    <!-- Admin-Login (nur Inhaber) -->
+    <div v-if="!authed" class="admin-login">
+      <div class="admin-card">
+        <h2>{{ $t('billing.adminTitle') }}</h2>
+        <p class="admin-hint">{{ $t('billing.adminHint') }}</p>
+        <input ref="pwInput" v-model="pw" type="password" class="admin-input"
+               :placeholder="$t('login.passwordPlaceholder')" :disabled="loggingIn"
+               @keydown.enter.prevent="doAdminLogin" autocomplete="current-password" />
+        <p v-if="loginError" class="admin-err">{{ $t('billing.adminWrong') }}</p>
+        <button class="admin-btn" :disabled="loggingIn || !pw" @click="doAdminLogin">
+          {{ loggingIn ? $t('login.submitting') : $t('billing.adminSubmit') }}
+        </button>
+      </div>
+    </div>
+
+    <div v-else class="billing-body">
       <p class="billing-sub">{{ $t('billing.subtitle') }}</p>
 
       <div v-if="loading" class="billing-loading">{{ $t('common.loading') }}</div>
@@ -81,12 +97,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import werwolfLogo from '../assets/logo/werwolf-icon.svg'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
-import { listBilling, updateBilling } from '../api/billing'
+import { listBilling, updateBilling, adminLogin } from '../api/billing'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -94,7 +110,56 @@ const { t } = useI18n()
 const rows = ref([])
 const loading = ref(true)
 
+// Admin-Zugang (nur Inhaber)
+const adminToken = ref(localStorage.getItem('adminToken') || '')
+const authed = ref(!!adminToken.value)
+const pw = ref('')
+const loggingIn = ref(false)
+const loginError = ref(false)
+const pwInput = ref(null)
+
 const goHome = () => router.push('/')
+
+const doAdminLogin = async () => {
+  if (!pw.value || loggingIn.value) return
+  loginError.value = false
+  loggingIn.value = true
+  try {
+    const res = await adminLogin(pw.value)
+    if (res && res.success && res.token) {
+      localStorage.setItem('adminToken', res.token)
+      adminToken.value = res.token
+      authed.value = true
+      pw.value = ''
+      await load()
+    } else {
+      loginError.value = true
+    }
+  } catch (e) {
+    loginError.value = true
+  } finally {
+    loggingIn.value = false
+  }
+}
+
+const adminLogout = () => {
+  localStorage.removeItem('adminToken')
+  adminToken.value = ''
+  authed.value = false
+  rows.value = []
+}
+
+const load = async () => {
+  loading.value = true
+  try {
+    const res = await listBilling()
+    rows.value = res.data || []
+  } catch (e) {
+    if (e && e.message === 'admin_required') adminLogout()
+  } finally {
+    loading.value = false
+  }
+}
 
 const fmtDate = (iso) => {
   if (!iso) return '—'
@@ -135,11 +200,12 @@ const save = async (row) => {
 }
 
 onMounted(async () => {
-  try {
-    const res = await listBilling()
-    rows.value = res.data || []
-  } catch (e) { /* leer */ }
-  loading.value = false
+  if (authed.value) {
+    await load()
+  } else {
+    loading.value = false
+    nextTick(() => pwInput.value?.focus())
+  }
 })
 </script>
 
@@ -153,6 +219,16 @@ onMounted(async () => {
 .billing-head-right { display: flex; align-items: center; gap: 14px; }
 .billing-back { background: none; border: 1px solid rgba(255,255,255,0.3); color: #fff; border-radius: 6px; padding: 5px 12px; font-family: inherit; font-size: 0.8rem; cursor: pointer; }
 .billing-back:hover { border-color: rgba(255,255,255,0.6); }
+
+.admin-login { display: flex; justify-content: center; padding: 60px 22px; }
+.admin-card { width: 100%; max-width: 360px; background: #fff; border: 1px solid #e6e6e6; border-radius: 12px; padding: 28px; text-align: center; }
+.admin-card h2 { font-size: 1.15rem; font-weight: 800; margin-bottom: 4px; }
+.admin-hint { font-size: 0.82rem; color: #888; margin-bottom: 18px; }
+.admin-input { width: 100%; padding: 11px 13px; border: 1.5px solid #e0e0e0; border-radius: 8px; font-family: inherit; font-size: 0.95rem; outline: none; }
+.admin-input:focus { border-color: #ff6b2c; }
+.admin-err { color: #d9480f; font-size: 0.8rem; margin-top: 8px; }
+.admin-btn { width: 100%; margin-top: 16px; padding: 12px; background: #ff6b2c; color: #fff; border: none; border-radius: 8px; font-family: inherit; font-weight: 700; cursor: pointer; }
+.admin-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .billing-body { max-width: 1200px; margin: 0 auto; padding: 24px 22px; }
 .billing-sub { color: #666; font-size: 0.88rem; margin-bottom: 18px; }

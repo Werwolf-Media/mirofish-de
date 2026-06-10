@@ -866,6 +866,12 @@
     "total": "Gesamt",
     "perProject": "Summe je Projekt",
     "priceHint": "Kosten sind eine Näherung in Euro (OpenRouter-Verbrauch). Für eine saubere Zuordnung jeweils nur einen Run gleichzeitig laufen lassen. Richtpreis: 25–80 €.",
-    "empty": "Noch keine Runs vorhanden."
+    "empty": "Noch keine Runs vorhanden.",
+    "footerLink": "Abrechnung (Inhaber)",
+    "adminTitle": "Abrechnung – Anmeldung",
+    "adminHint": "Nur für den Inhaber",
+    "adminSubmit": "Anmelden",
+    "adminWrong": "Falsches Admin-Passwort",
+    "adminLogout": "Abmelden"
   }
 }
