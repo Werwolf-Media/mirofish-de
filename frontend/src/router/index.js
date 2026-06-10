@@ -6,6 +6,7 @@ import SimulationRunView from '../views/SimulationRunView.vue'
 import ReportView from '../views/ReportView.vue'
 import InteractionView from '../views/InteractionView.vue'
 import SharedView from '../components/SharedView.vue'
+import BillingView from '../views/BillingView.vue'
 
 const routes = [
   {
@@ -49,6 +50,11 @@ const routes = [
     component: SharedView,
     props: true,
     meta: { public: true }
+  },
+  {
+    path: '/billing',
+    name: 'Billing',
+    component: BillingView
   }
 ]
 

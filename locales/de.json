@@ -851,5 +851,21 @@
     "revoked": "Dieser Link wurde vom Ersteller deaktiviert.",
     "limitReached": "Nachrichtenlimit erreicht – bitte den Ersteller kontaktieren.",
     "poweredBy": "Bereitgestellt mit MiroFish · Werwolf Media"
+  },
+  "billing": {
+    "navButton": "Abrechnung",
+    "title": "Abrechnung",
+    "subtitle": "Kosten pro Run und abzurechnender Betrag je Projekt.",
+    "date": "Datum",
+    "project": "Projekt",
+    "requirement": "Anforderung",
+    "status": "Status",
+    "cost": "Kosten",
+    "price": "Abrechnungspreis",
+    "margin": "Marge",
+    "total": "Gesamt",
+    "perProject": "Summe je Projekt",
+    "priceHint": "Kosten sind eine Näherung in Euro (OpenRouter-Verbrauch). Für eine saubere Zuordnung jeweils nur einen Run gleichzeitig laufen lassen. Richtpreis: 25–80 €.",
+    "empty": "Noch keine Runs vorhanden."
   }
 }

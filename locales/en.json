@@ -851,5 +851,21 @@
     "revoked": "This link has been deactivated by the owner.",
     "limitReached": "Message limit reached — please contact the owner.",
     "poweredBy": "Powered by MiroFish · Werwolf Media"
+  },
+  "billing": {
+    "navButton": "Billing",
+    "title": "Billing",
+    "subtitle": "Cost per run and amount to invoice per project.",
+    "date": "Date",
+    "project": "Project",
+    "requirement": "Requirement",
+    "status": "Status",
+    "cost": "Cost",
+    "price": "Billing price",
+    "margin": "Margin",
+    "total": "Total",
+    "perProject": "Per project",
+    "priceHint": "Cost is an approximation in EUR (OpenRouter usage). Run one simulation at a time for accurate cost attribution. Suggested price: 25–80 €.",
+    "empty": "No runs yet."
   }
 }

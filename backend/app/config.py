@@ -39,6 +39,10 @@ class Config:
     # Prompt-Generierung). Gleicher OpenRouter-Key/-Base-URL; Fallback: LLM_MODEL_NAME.
     WIZARD_MODEL_NAME = os.environ.get('WIZARD_MODEL_NAME') \
         or os.environ.get('LLM_MODEL_NAME', 'anthropic/claude-3.5-sonnet')
+
+    # Abrechnung: USD->EUR-Näherungskurs + Standard-Abrechnungspreis pro Run
+    EUR_PER_USD = float(os.environ.get('EUR_PER_USD', '0.92'))
+    DEFAULT_BILLING_PRICE_EUR = float(os.environ.get('DEFAULT_BILLING_PRICE_EUR', '50'))
     
     # Zep配置
     ZEP_API_KEY = os.environ.get('ZEP_API_KEY')

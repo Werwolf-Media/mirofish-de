@@ -12,6 +12,7 @@
         <a href="https://github.com/Werwolf-Media/mirofish-de" target="_blank" class="github-link">
           {{ $t('nav.visitGithub') }} <span class="arrow">↗</span>
         </a>
+        <button class="logout-link" @click="router.push('/billing')">{{ $t('billing.navButton') }}</button>
         <button class="logout-link" @click="handleLogout">{{ $t('login.logout') }}</button>
       </div>
     </nav>

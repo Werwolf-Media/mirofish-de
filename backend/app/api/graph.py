@@ -183,6 +183,14 @@ def generate_ontology():
         project = ProjectManager.create_project(name=project_name)
         project.simulation_requirement = simulation_requirement
         logger.info(f"创建项目: {project.project_id}")
+
+        # Abrechnung: Run-Start markieren + OpenRouter-Verbrauch snapshoten (vor jedem LLM-Aufruf)
+        try:
+            from ..models.billing import BillingManager
+            from ..utils.openrouter_cost import get_usage as _or_usage
+            BillingManager.start(project.project_id, project_name, simulation_requirement, _or_usage())
+        except Exception as _e:
+            logger.warning(f"Abrechnung Start-Hook fehlgeschlagen: {_e}")
         
         # 保存文件并提取文本
         document_texts = []

@@ -1720,6 +1720,19 @@ class ReportAgent:
             
             # 保存最终报告
             ReportManager.save_report(report)
+
+            # Abrechnung: Run-Ende markieren + Kosten (OpenRouter-Saldo-Delta) festhalten
+            try:
+                from ..models.billing import BillingManager
+                from ..utils.openrouter_cost import get_usage as _or_usage
+                from .simulation_manager import SimulationManager as _SimMgr
+                _state = _SimMgr().get_simulation(self.simulation_id)
+                _pid = _state.project_id if _state else None
+                if _pid:
+                    BillingManager.finish(_pid, report_id, self.simulation_id, _or_usage())
+            except Exception as _e:
+                logger.warning(f"Abrechnung End-Hook fehlgeschlagen: {_e}")
+
             ReportManager.update_progress(
                 report_id, "completed", 100, t('progress.reportComplete'),
                 completed_sections=completed_section_titles
