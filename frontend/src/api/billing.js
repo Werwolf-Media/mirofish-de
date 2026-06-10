@@ -31,3 +31,5 @@ export const adminLogin = (password) => admin.post('/api/auth/admin-login', { pa
 export const listBilling = () => admin.get('/api/billing/list')
 export const updateBilling = (projectId, data) => admin.post(`/api/billing/${projectId}/update`, data)
 export const setDefaultPrice = (price) => admin.post('/api/billing/settings', { default_billing_price_eur: price })
+export const setInvoiced = (projectId, invoiced) => admin.post(`/api/billing/${projectId}/invoiced`, { invoiced })
+export const deleteBilling = (projectId) => admin.post(`/api/billing/${projectId}/delete`)

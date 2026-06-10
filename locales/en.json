@@ -875,6 +875,13 @@
     "adminLogout": "Sign out",
     "defaultPrice": "Default price for new runs",
     "savePrice": "Save",
-    "defaultPriceHint": "Applies to future runs; existing runs keep their price."
+    "defaultPriceHint": "Applies to future runs; existing runs keep their price.",
+    "actions": "Actions",
+    "invoiced": "Invoiced",
+    "markInvoiced": "Mark as invoiced",
+    "markOpen": "Mark as open",
+    "delete": "Delete",
+    "confirmDelete": "Really delete this entry?",
+    "openTotal": "Still to invoice"
   }
 }

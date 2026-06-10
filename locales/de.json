@@ -875,6 +875,13 @@
     "adminLogout": "Abmelden",
     "defaultPrice": "Standardpreis für neue Runs",
     "savePrice": "Speichern",
-    "defaultPriceHint": "Gilt für künftige Runs; bestehende behalten ihren Preis."
+    "defaultPriceHint": "Gilt für künftige Runs; bestehende behalten ihren Preis.",
+    "actions": "Aktionen",
+    "invoiced": "Abgerechnet",
+    "markInvoiced": "Als abgerechnet",
+    "markOpen": "Als offen",
+    "delete": "Löschen",
+    "confirmDelete": "Diesen Eintrag wirklich löschen?",
+    "openTotal": "Noch abzurechnen"
   }
 }

@@ -43,6 +43,7 @@ def _enrich(rec: dict) -> dict:
         "cost_usd": float(cost_usd) if has_cost else None,
         "cost_eur": cost_eur,
         "margin_eur": margin,
+        "invoiced": bool(rec.get('invoiced', False)),
     }
 
 
@@ -91,3 +92,22 @@ def update_billing(project_id: str):
     if not rec:
         return jsonify({"success": False, "error": "billing_not_found"}), 404
     return jsonify({"success": True, "data": _enrich(rec)})
+
+
+@billing_bp.route('/<project_id>/invoiced', methods=['POST'])
+def set_invoiced(project_id: str):
+    if not _admin_ok():
+        return jsonify({"success": False, "error": "admin_required"}), 401
+    data = request.get_json(silent=True) or {}
+    rec = BillingManager.set_invoiced(project_id, bool(data.get('invoiced', True)))
+    if not rec:
+        return jsonify({"success": False, "error": "billing_not_found"}), 404
+    return jsonify({"success": True, "data": _enrich(rec)})
+
+
+@billing_bp.route('/<project_id>/delete', methods=['POST'])
+def delete_billing(project_id: str):
+    if not _admin_ok():
+        return jsonify({"success": False, "error": "admin_required"}), 401
+    ok = BillingManager.delete(project_id)
+    return jsonify({"success": bool(ok)})

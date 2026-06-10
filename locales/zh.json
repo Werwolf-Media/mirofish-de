@@ -875,6 +875,13 @@
     "adminLogout": "退出",
     "defaultPrice": "新运行的默认价格",
     "savePrice": "保存",
-    "defaultPriceHint": "适用于今后的运行；现有运行保留其价格。"
+    "defaultPriceHint": "适用于今后的运行；现有运行保留其价格。",
+    "actions": "操作",
+    "invoiced": "已结算",
+    "markInvoiced": "标记为已结算",
+    "markOpen": "标记为未结",
+    "delete": "删除",
+    "confirmDelete": "确定删除此条目？",
+    "openTotal": "待结算"
   }
 }

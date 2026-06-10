@@ -52,23 +52,33 @@
             <th class="num">{{ $t('billing.cost') }}</th>
             <th class="num">{{ $t('billing.price') }}</th>
             <th class="num">{{ $t('billing.margin') }}</th>
+            <th class="actions-col">{{ $t('billing.actions') }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="row in rows" :key="row.project_id">
+          <tr v-for="row in rows" :key="row.project_id" :class="{ invoiced: row.invoiced }">
             <td class="nowrap">{{ fmtDate(row.created_at) }}</td>
             <td>
               <input class="cell-input" v-model="row.project_name"
                      @change="save(row)" @blur="save(row)" :placeholder="$t('billing.project')" />
             </td>
             <td class="req">{{ truncate(row.requirement, 60) }}</td>
-            <td><span class="bstatus" :class="row.status">{{ row.status }}</span></td>
+            <td>
+              <span class="bstatus" :class="row.status">{{ row.status }}</span>
+              <span v-if="row.invoiced" class="bstatus invoiced-badge">{{ $t('billing.invoiced') }}</span>
+            </td>
             <td class="num">{{ row.cost_eur != null ? eur(row.cost_eur) : '—' }}</td>
             <td class="num">
               <input class="cell-price" type="number" min="0" step="1" v-model.number="row.billing_price_eur"
                      @change="save(row)" @blur="save(row)" /> €
             </td>
             <td class="num" :class="marginClass(row)">{{ row.margin_eur != null ? eur(row.margin_eur) : '—' }}</td>
+            <td class="actions-col">
+              <button class="act-btn" @click="markInvoiced(row)" :title="row.invoiced ? $t('billing.markOpen') : $t('billing.markInvoiced')">
+                {{ row.invoiced ? $t('billing.markOpen') : $t('billing.markInvoiced') }}
+              </button>
+              <button class="act-del" @click="removeRow(row)" :title="$t('billing.delete')">🗑</button>
+            </td>
           </tr>
         </tbody>
         <tfoot>
@@ -77,6 +87,13 @@
             <td class="num">{{ eur(totalCost) }}</td>
             <td class="num">{{ eur(totalPrice) }}</td>
             <td class="num">{{ eur(totalMargin) }}</td>
+            <td></td>
+          </tr>
+          <tr class="open-row">
+            <td colspan="4">{{ $t('billing.openTotal') }}</td>
+            <td></td>
+            <td class="num">{{ eur(openTotal) }}</td>
+            <td colspan="2"></td>
           </tr>
         </tfoot>
       </table>
@@ -110,7 +127,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import werwolfLogo from '../assets/logo/werwolf-icon.svg'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
-import { listBilling, updateBilling, adminLogin, setDefaultPrice } from '../api/billing'
+import { listBilling, updateBilling, adminLogin, setDefaultPrice, setInvoiced, deleteBilling } from '../api/billing'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -194,6 +211,7 @@ const marginClass = (row) => row.margin_eur == null ? '' : (row.margin_eur >= 0 
 const totalCost = computed(() => rows.value.reduce((s, r) => s + (r.cost_eur || 0), 0))
 const totalPrice = computed(() => rows.value.reduce((s, r) => s + (Number(r.billing_price_eur) || 0), 0))
 const totalMargin = computed(() => rows.value.reduce((s, r) => s + (r.margin_eur != null ? r.margin_eur : (Number(r.billing_price_eur) || 0)), 0))
+const openTotal = computed(() => rows.value.filter(r => !r.invoiced).reduce((s, r) => s + (Number(r.billing_price_eur) || 0), 0))
 
 const perProject = computed(() => {
   const map = {}
@@ -206,6 +224,23 @@ const perProject = computed(() => {
   }
   return Object.values(map)
 })
+
+const markInvoiced = async (row) => {
+  const target = !row.invoiced
+  try {
+    const res = await setInvoiced(row.project_id, target)
+    if (res.data) row.invoiced = res.data.invoiced
+    else row.invoiced = target
+  } catch (e) { /* ignore */ }
+}
+
+const removeRow = async (row) => {
+  if (!window.confirm(t('billing.confirmDelete'))) return
+  try {
+    await deleteBilling(row.project_id)
+    rows.value = rows.value.filter(r => r.project_id !== row.project_id)
+  } catch (e) { /* ignore */ }
+}
 
 const save = async (row) => {
   try {
@@ -278,6 +313,15 @@ onMounted(async () => {
 .num.pos { color: #2f9e44; }
 .num.neg { color: #e03131; }
 .total-row td { font-weight: 700; background: #fafafa; border-top: 2px solid #e6e6e6; }
+.open-row td { background: #fafafa; color: #555; font-size: 0.8rem; }
+.actions-col { text-align: right; white-space: nowrap; }
+.act-btn { background: none; border: 1px solid #ddd; border-radius: 6px; padding: 4px 9px; font-family: inherit; font-size: 0.72rem; cursor: pointer; color: #444; }
+.act-btn:hover { border-color: #2f9e44; color: #2f9e44; }
+.act-del { background: none; border: 1px solid #eee; border-radius: 6px; padding: 4px 8px; margin-left: 6px; cursor: pointer; font-size: 0.8rem; }
+.act-del:hover { border-color: #e03131; }
+tr.invoiced { opacity: 0.6; }
+tr.invoiced .cell-input, tr.invoiced .cell-price { background: transparent; }
+.invoiced-badge { background: #e6f4ea !important; color: #2f9e44 !important; margin-left: 6px; }
 
 .per-project { margin-top: 26px; }
 .per-project h3 { font-size: 0.95rem; margin-bottom: 10px; }

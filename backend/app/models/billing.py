@@ -94,6 +94,7 @@ class BillingManager:
             "cost_usd": 0.0,
             "usage_start": None,
             "usage_end": None,
+            "invoiced": False,
         }
         rec["usage_start"] = usage_start
         if requirement and not rec.get("requirement"):
@@ -111,7 +112,7 @@ class BillingManager:
                 "simulation_id": "", "report_id": "", "status": "running",
                 "created_at": datetime.now(timezone.utc).isoformat(), "completed_at": "",
                 "billing_price_eur": cls.default_price(),
-                "cost_usd": 0.0, "usage_start": None, "usage_end": None,
+                "cost_usd": 0.0, "usage_start": None, "usage_end": None, "invoiced": False,
             }
         rec["report_id"] = report_id or rec.get("report_id", "")
         rec["simulation_id"] = simulation_id or rec.get("simulation_id", "")
@@ -139,6 +140,26 @@ class BillingManager:
             rec['billing_price_eur'] = max(0.0, min(500.0, price))
         cls._save(rec)
         return rec
+
+    @classmethod
+    def set_invoiced(cls, project_id: str, value: bool):
+        rec = cls.get(project_id)
+        if not rec:
+            return None
+        rec['invoiced'] = bool(value)
+        cls._save(rec)
+        return rec
+
+    @classmethod
+    def delete(cls, project_id: str) -> bool:
+        path = cls._path(project_id)
+        if os.path.exists(path):
+            try:
+                os.remove(path)
+                return True
+            except Exception:
+                return False
+        return False
 
     @classmethod
     def list(cls):
