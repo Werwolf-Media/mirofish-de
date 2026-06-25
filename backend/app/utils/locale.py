@@ -66,4 +66,15 @@ def t(key: str, **kwargs) -> str:
 def get_language_instruction() -> str:
     locale = get_locale()
     lang_config = _languages.get(locale, _languages.get('de', _languages.get('zh', {})))
-    return lang_config.get('llmInstruction', 'Bitte antworten Sie auf Deutsch.')
+    base = lang_config.get('llmInstruction', 'Bitte antworten Sie auf Deutsch.')
+    # Verstärkung: erzwingt, dass die Ausgabe vollständig in der Zielsprache erfolgt und
+    # auch fremdsprachige Quelldaten (Simulations-Posts, Zitate, Interviews – z. B. auf
+    # Chinesisch oder Englisch) in die Zielsprache ÜBERSETZT werden, statt sie zu übernehmen.
+    reinforce = (
+        " Verfasse die GESAMTE Ausgabe ausschließlich in dieser Sprache. Übersetze dabei ALLE "
+        "Inhalte, Zitate, Aussagen und Quellenangaben in diese Sprache – auch wenn die zugrunde "
+        "liegenden Daten (z. B. Simulations-Posts oder Interview-Antworten) in einer anderen "
+        "Sprache wie Chinesisch oder Englisch vorliegen. Gib niemals Originaltext in der "
+        "Ausgangssprache wieder."
+    )
+    return f"{base}{reinforce}"
