@@ -513,13 +513,16 @@ class ZepToolsService:
             SearchResult: 搜索结果
         """
         logger.info(t("console.graphSearch", graphId=graph_id, query=query[:50]))
-        
+
+        # Zep erlaubt max. 400 Zeichen pro Suchanfrage -> sicher kürzen
+        zep_query = (query or "")[:400]
+
         # 尝试使用Zep Cloud Search API
         try:
             search_results = self._call_with_retry(
                 func=lambda: self.client.graph.search(
                     graph_id=graph_id,
-                    query=query,
+                    query=zep_query,
                     limit=limit,
                     scope=scope,
                     reranker="cross_encoder"

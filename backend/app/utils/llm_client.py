@@ -63,6 +63,10 @@ class LLMClient:
         
         response = self.client.chat.completions.create(**kwargs)
         content = response.choices[0].message.content
+        # Manche Modelle (z. B. Gemini bei reinem Tool-Call/leerer Antwort) liefern
+        # content=None -> re.sub würde crashen. Auf "" absichern.
+        if content is None:
+            content = ""
         # 部分模型（如MiniMax M2.5）会在content中包含<think>思考内容，需要移除
         content = re.sub(r'<think>[\s\S]*?</think>', '', content).strip()
         return content
