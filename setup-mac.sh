@@ -56,7 +56,7 @@ else
 # ===== LLM (OpenAI-kompatibel, hier OpenRouter) =====
 LLM_API_KEY=HIER_OPENROUTER_KEY_EINTRAGEN
 LLM_BASE_URL=https://openrouter.ai/api/v1
-LLM_MODEL_NAME=openai/gpt-5-mini
+LLM_MODEL_NAME=openai/gpt-4o-mini
 
 # Optional: staerkeres Modell nur fuer den KI-Assistenten (Fallback: LLM_MODEL_NAME)
 WIZARD_MODEL_NAME=anthropic/claude-3.5-sonnet
