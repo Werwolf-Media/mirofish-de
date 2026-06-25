@@ -174,6 +174,37 @@ except ImportError as e:
     sys.exit(1)
 
 
+# ===== Sprache der simulierten Agenten erzwingen (Deutsch) =====
+# Die OASIS-Agenten posten sonst je nach Modell in einer anderen Sprache (z. B.
+# Chinesisch). Wir hängen eine harte Sprach-Direktive an die System-Message JEDES
+# Agenten, sodass alle Posts/Kommentare auf Deutsch entstehen. Über SIM_LANGUAGE
+# (ENV) konfigurierbar; Default Deutsch.
+SIM_LANGUAGE = os.environ.get('SIM_LANGUAGE', 'Deutsch')
+SIM_LANG_DIRECTIVE = (
+    f"\n\n[SPRACHE] Schreibe ALLE Beiträge, Posts, Kommentare und Antworten "
+    f"AUSNAHMSLOS auf {SIM_LANGUAGE} – unabhängig vom Thema, von deinen Erinnerungen "
+    f"oder der Sprache anderer Inhalte. Verwende ausschließlich {SIM_LANGUAGE}."
+)
+
+
+def _force_agent_language(agent):
+    """Hängt eine harte Sprach-Direktive an die System-Message eines OASIS-Agenten."""
+    try:
+        sm = getattr(agent, '_system_message', None) or getattr(agent, 'system_message', None)
+        if sm is None or not hasattr(sm, 'content'):
+            return
+        content = sm.content
+        if not isinstance(content, str) or '[SPRACHE]' in content:
+            return
+        sm.content = content + SIM_LANG_DIRECTIVE
+        # Frisch erzeugte Agenten: Gedächtnis mit aktualisierter System-Message neu aufsetzen
+        init_fn = getattr(agent, 'init_messages', None)
+        if callable(init_fn):
+            init_fn()
+    except Exception:
+        pass
+
+
 # Twitter可用动作（不包含INTERVIEW，INTERVIEW只能通过ManualAction手动触发）
 TWITTER_ACTIONS = [
     ActionType.CREATE_POST,
@@ -1147,6 +1178,7 @@ async def run_twitter_simulation(
     for agent_id, agent in result.agent_graph.get_agents():
         if agent_id not in agent_names:
             agent_names[agent_id] = getattr(agent, 'name', f'Agent_{agent_id}')
+        _force_agent_language(agent)
     
     db_path = os.path.join(simulation_dir, "twitter_simulation.db")
     if os.path.exists(db_path):
@@ -1338,6 +1370,7 @@ async def run_reddit_simulation(
     for agent_id, agent in result.agent_graph.get_agents():
         if agent_id not in agent_names:
             agent_names[agent_id] = getattr(agent, 'name', f'Agent_{agent_id}')
+        _force_agent_language(agent)
     
     db_path = os.path.join(simulation_dir, "reddit_simulation.db")
     if os.path.exists(db_path):

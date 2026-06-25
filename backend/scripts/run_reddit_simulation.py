@@ -131,6 +131,32 @@ except ImportError as e:
     sys.exit(1)
 
 
+# ===== Sprache der simulierten Agenten erzwingen (Deutsch) =====
+SIM_LANGUAGE = os.environ.get('SIM_LANGUAGE', 'Deutsch')
+SIM_LANG_DIRECTIVE = (
+    f"\n\n[SPRACHE] Schreibe ALLE Beiträge, Posts, Kommentare und Antworten "
+    f"AUSNAHMSLOS auf {SIM_LANGUAGE} – unabhängig vom Thema, von deinen Erinnerungen "
+    f"oder der Sprache anderer Inhalte. Verwende ausschließlich {SIM_LANGUAGE}."
+)
+
+
+def _force_agent_language(agent):
+    """Hängt eine harte Sprach-Direktive an die System-Message eines OASIS-Agenten."""
+    try:
+        sm = getattr(agent, '_system_message', None) or getattr(agent, 'system_message', None)
+        if sm is None or not hasattr(sm, 'content'):
+            return
+        content = sm.content
+        if not isinstance(content, str) or '[SPRACHE]' in content:
+            return
+        sm.content = content + SIM_LANG_DIRECTIVE
+        init_fn = getattr(agent, 'init_messages', None)
+        if callable(init_fn):
+            init_fn()
+    except Exception:
+        pass
+
+
 # IPC相关常量
 IPC_COMMANDS_DIR = "ipc_commands"
 IPC_RESPONSES_DIR = "ipc_responses"
@@ -567,7 +593,9 @@ class RedditSimulationRunner:
             model=model,
             available_actions=self.AVAILABLE_ACTIONS,
         )
-        
+        for _aid, _agent in self.agent_graph.get_agents():
+            _force_agent_language(_agent)
+
         db_path = self._get_db_path()
         if os.path.exists(db_path):
             os.remove(db_path)
