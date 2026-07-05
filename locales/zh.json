@@ -239,7 +239,8 @@
     "availableActions": "可用动作",
     "simulationMonitor": "模拟监视器",
     "platformInfoPlaza": "信息广场",
-    "platformTopicCommunity": "话题社区"
+    "platformTopicCommunity": "话题社区",
+    "liveCost": "实时成本"
   },
   "step4": {
     "generatingSection": "正在生成{title}...",
@@ -318,7 +319,13 @@
     "predictionReport": "预测报告",
     "downloadPdf": "下载 PDF",
     "pdfGeneratedOn": "生成于 {date}",
-    "pdfFooter": "由 MiroFish 生成 · Werwolf Media"
+    "pdfFooter": "由 MiroFish 生成 · Werwolf Media",
+    "failedTitle": "报告生成失败",
+    "failedHint": "模拟数据已保留——你可以重新生成报告，无需重新运行模拟。",
+    "retryButton": "重新生成报告",
+    "retrying": "正在重新生成……",
+    "failedCredits": "OpenRouter 额度/限额已用尽（错误 402）。请充值或提高密钥限额后重试。",
+    "failedRateLimit": "已达服务商速率限制（错误 429）。请稍候再试。"
   },
   "step5": {
     "interactiveTools": "Interactive Tools",
@@ -467,7 +474,8 @@
     "germanSourcesNone": "未找到匹配的德语来源",
     "germanSourcesFailed": "抓取德语来源失败：{error}",
     "loginInvalid": "密码错误",
-    "seedTextLabel": "描述（助手）"
+    "seedTextLabel": "描述（助手）",
+    "costCapExceeded": "超出成本上限（{cost} € > {limit} €）——已中止模拟。"
   },
   "progress": {
     "initGraphService": "初始化图谱构建服务...",
@@ -882,6 +890,17 @@
     "markOpen": "标记为未结",
     "delete": "删除",
     "confirmDelete": "确定删除此条目？",
-    "openTotal": "待结算"
+    "openTotal": "待结算",
+    "settingsTitle": "模型与成本上限",
+    "activeModel": "当前 LLM 模型",
+    "useRecommended": "使用推荐模型",
+    "modelOverrideActive": "管理员覆盖已生效（覆盖 .env）",
+    "costCap": "每次运行成本上限",
+    "costCapHint": "0 = 关闭。若运行期间 OpenRouter 增量超过此值，将中止模拟。",
+    "saveSettings": "保存",
+    "settingsApplied": "立即对新运行生效——无需重启",
+    "modelWarn_reasoning": "“{model}”是推理模型——与 MiroFish 不兼容（参数冲突，隐藏的思考 token 会抬高每次 agent 调用的成本）。",
+    "modelWarn_expensive": "“{model}”是昂贵模型——单次运行可能花费两位数欧元。",
+    "modelWarn_chinese": "“{model}”即使有语言指令也倾向于输出中文。"
   }
 }

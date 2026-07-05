@@ -239,7 +239,8 @@
     "availableActions": "Verfügbare Aktionen",
     "simulationMonitor": "SIMULATIONS-MONITOR",
     "platformInfoPlaza": "Info-Plaza",
-    "platformTopicCommunity": "Themen-Community"
+    "platformTopicCommunity": "Themen-Community",
+    "liveCost": "Live-Kosten"
   },
   "step4": {
     "generatingSection": "{title} wird generiert ...",
@@ -318,7 +319,13 @@
     "predictionReport": "Prognosebericht",
     "downloadPdf": "Als PDF herunterladen",
     "pdfGeneratedOn": "Erstellt am {date}",
-    "pdfFooter": "Erstellt mit MiroFish · Werwolf Media"
+    "pdfFooter": "Erstellt mit MiroFish · Werwolf Media",
+    "failedTitle": "Berichtserstellung fehlgeschlagen",
+    "failedHint": "Die Simulationsdaten bleiben erhalten — du kannst den Bericht neu erstellen, ohne die Simulation erneut laufen zu lassen.",
+    "retryButton": "Bericht erneut erstellen",
+    "retrying": "Wird neu erstellt …",
+    "failedCredits": "OpenRouter-Guthaben/Limit erschöpft (Fehler 402). Bitte Guthaben aufladen oder das Key-Limit erhöhen, dann erneut versuchen.",
+    "failedRateLimit": "Anbieter-Ratenlimit erreicht (Fehler 429). Kurz warten und erneut versuchen."
   },
   "step5": {
     "interactiveTools": "Interaktive Werkzeuge",
@@ -467,7 +474,8 @@
     "germanSourcesNone": "Keine passenden deutschen Quellen gefunden",
     "germanSourcesFailed": "Abruf deutscher Quellen fehlgeschlagen: {error}",
     "loginInvalid": "Falsches Passwort",
-    "seedTextLabel": "Beschreibung (Assistent)"
+    "seedTextLabel": "Beschreibung (Assistent)",
+    "costCapExceeded": "Kosten-Deckel überschritten ({cost} € > {limit} €) — Simulation abgebrochen."
   },
   "progress": {
     "initGraphService": "Graph-Aufbaudienst wird initialisiert ...",
@@ -882,6 +890,17 @@
     "markOpen": "Als offen",
     "delete": "Löschen",
     "confirmDelete": "Diesen Eintrag wirklich löschen?",
-    "openTotal": "Noch abzurechnen"
+    "openTotal": "Noch abzurechnen",
+    "settingsTitle": "Modell & Kosten-Deckel",
+    "activeModel": "Aktives LLM-Modell",
+    "useRecommended": "Empfohlenes einsetzen",
+    "modelOverrideActive": "Admin-Override aktiv (überschreibt .env)",
+    "costCap": "Kosten-Deckel pro Run",
+    "costCapHint": "0 = deaktiviert. Wird das OpenRouter-Delta während eines Runs überschritten, bricht die Simulation ab.",
+    "saveSettings": "Speichern",
+    "settingsApplied": "Gilt sofort für neue Runs — kein Neustart nötig",
+    "modelWarn_reasoning": "„{model}\" ist ein Reasoning-Modell — inkompatibel mit MiroFish (Parameter-Konflikte, versteckte Denk-Tokens verteuern jeden Agent-Call).",
+    "modelWarn_expensive": "„{model}\" ist ein teures Modell — ein Run kann zweistellige EUR-Beträge kosten.",
+    "modelWarn_chinese": "„{model}\" neigt trotz Sprachvorgabe zu chinesischer Ausgabe."
   }
 }

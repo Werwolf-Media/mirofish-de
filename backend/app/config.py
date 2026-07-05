@@ -45,6 +45,12 @@ class Config:
     # Abrechnung: USD->EUR-Näherungskurs + Standard-Abrechnungspreis pro Run
     EUR_PER_USD = float(os.environ.get('EUR_PER_USD', '0.92'))
     DEFAULT_BILLING_PRICE_EUR = float(os.environ.get('DEFAULT_BILLING_PRICE_EUR', '50'))
+
+    # Kosten-Schutzschalter: harter Deckel pro Run in EUR. Übersteigt das
+    # OpenRouter-Saldo-Delta diesen Wert während einer laufenden Simulation,
+    # wird der Simulationsprozess abgebrochen. 0 = deaktiviert.
+    # Im Admin-Bereich (Abrechnung) zur Laufzeit überschreibbar.
+    MAX_COST_EUR = float(os.environ.get('MAX_COST_EUR', '15'))
     
     # Zep配置
     ZEP_API_KEY = os.environ.get('ZEP_API_KEY')

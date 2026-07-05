@@ -33,3 +33,6 @@ export const updateBilling = (projectId, data) => admin.post(`/api/billing/${pro
 export const setDefaultPrice = (price) => admin.post('/api/billing/settings', { default_billing_price_eur: price })
 export const setInvoiced = (projectId, invoiced) => admin.post(`/api/billing/${projectId}/invoiced`, { invoiced })
 export const deleteBilling = (projectId) => admin.post(`/api/billing/${projectId}/delete`)
+export const getSettings = () => admin.get('/api/billing/settings')
+// fields: { llm_model?, max_cost_eur?, default_billing_price_eur? }
+export const saveSettings = (fields) => admin.post('/api/billing/settings', fields)

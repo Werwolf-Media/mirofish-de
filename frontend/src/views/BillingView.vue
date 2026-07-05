@@ -39,6 +39,39 @@
         <span class="default-price-hint">{{ $t('billing.defaultPriceHint') }}</span>
       </div>
 
+      <!-- Modell + Kosten-Deckel (Admin, kein Neustart nötig) -->
+      <div class="settings-panel">
+        <div class="settings-title">{{ $t('billing.settingsTitle') }}</div>
+
+        <div class="settings-row">
+          <label>{{ $t('billing.activeModel') }}</label>
+          <input class="model-input mono" v-model="settings.llm_model"
+                 :placeholder="settings.llm_model_recommended || 'openai/gpt-4o-mini'"
+                 @keydown.enter.prevent="saveSettingsAll" />
+          <button class="settings-mini" @click="settings.llm_model = settings.llm_model_recommended">
+            {{ $t('billing.useRecommended') }}
+          </button>
+          <span class="settings-hint" v-if="settings.llm_model_override">{{ $t('billing.modelOverrideActive') }}</span>
+          <span class="settings-hint" v-else>.env: <span class="mono">{{ settings.llm_model_env }}</span></span>
+        </div>
+
+        <div class="model-warn" v-for="w in (settings.model_warnings || [])" :key="w.code" :class="w.level">
+          {{ $t('billing.modelWarn_' + w.code, { model: w.model }) }}
+        </div>
+
+        <div class="settings-row">
+          <label>{{ $t('billing.costCap') }}</label>
+          <input type="number" min="0" step="1" class="cap-input" v-model.number="settings.max_cost_eur"
+                 @keydown.enter.prevent="saveSettingsAll" /> €
+          <span class="settings-hint">{{ $t('billing.costCapHint') }}</span>
+        </div>
+
+        <button class="settings-save" @click="saveSettingsAll">
+          {{ settingsSaved ? $t('share.copied') : $t('billing.saveSettings') }}
+        </button>
+        <span class="settings-applied">{{ $t('billing.settingsApplied') }}</span>
+      </div>
+
       <div v-if="loading" class="billing-loading">{{ $t('common.loading') }}</div>
       <div v-else-if="rows.length === 0" class="billing-empty">{{ $t('billing.empty') }}</div>
 
@@ -127,7 +160,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import werwolfLogo from '../assets/logo/werwolf-icon.svg'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
-import { listBilling, updateBilling, adminLogin, setDefaultPrice, setInvoiced, deleteBilling } from '../api/billing'
+import { listBilling, updateBilling, adminLogin, setDefaultPrice, setInvoiced, deleteBilling, getSettings, saveSettings } from '../api/billing'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -136,6 +169,17 @@ const rows = ref([])
 const loading = ref(true)
 const defaultPrice = ref(50)
 const defaultSaved = ref(false)
+
+// Modell + Kosten-Deckel (Admin-Settings)
+const settings = ref({
+  llm_model: '',
+  llm_model_override: null,
+  llm_model_env: '',
+  llm_model_recommended: '',
+  model_warnings: [],
+  max_cost_eur: 0,
+})
+const settingsSaved = ref(false)
 
 // Admin-Zugang (nur Inhaber)
 const adminToken = ref(localStorage.getItem('adminToken') || '')
@@ -182,11 +226,38 @@ const load = async () => {
     const res = await listBilling()
     rows.value = res.data || []
     if (typeof res.default_billing_price_eur === 'number') defaultPrice.value = res.default_billing_price_eur
+    await loadSettings()
   } catch (e) {
     if (e && e.message === 'admin_required') adminLogout()
   } finally {
     loading.value = false
   }
+}
+
+const loadSettings = async () => {
+  try {
+    const res = await getSettings()
+    if (res && res.data) {
+      settings.value = { ...settings.value, ...res.data }
+      // Editierbares Feld mit dem effektiven Modell vorbelegen
+      settings.value.llm_model = res.data.llm_model || ''
+    }
+  } catch (e) { /* ignore */ }
+}
+
+const saveSettingsAll = async () => {
+  try {
+    const res = await saveSettings({
+      llm_model: (settings.value.llm_model || '').trim(),
+      max_cost_eur: Number(settings.value.max_cost_eur) || 0,
+    })
+    if (res && res.data) {
+      settings.value = { ...settings.value, ...res.data }
+      settings.value.llm_model = res.data.llm_model || ''
+    }
+    settingsSaved.value = true
+    setTimeout(() => { settingsSaved.value = false }, 1500)
+  } catch (e) { /* ignore */ }
 }
 
 const saveDefault = async () => {
@@ -295,6 +366,25 @@ onMounted(async () => {
 .default-price-input:focus { border-color: #ff6b2c; outline: none; }
 .default-price-btn { background: #ff6b2c; color: #fff; border: none; border-radius: 7px; padding: 7px 14px; font-family: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
 .default-price-hint { color: #999; font-size: 0.74rem; margin-left: 6px; }
+
+/* Admin-Settings: Modell + Kosten-Deckel */
+.settings-panel { background: #fff; border: 1px solid #e6e6e6; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; font-size: 0.86rem; }
+.settings-title { font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.4px; color: #666; margin-bottom: 12px; }
+.settings-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.settings-row label { font-weight: 600; min-width: 130px; }
+.model-input { flex: 1; min-width: 220px; padding: 6px 8px; border: 1.5px solid #e0e0e0; border-radius: 6px; font-size: 0.82rem; }
+.model-input:focus { border-color: #ff6b2c; outline: none; }
+.cap-input { width: 70px; padding: 6px 8px; border: 1.5px solid #e0e0e0; border-radius: 6px; font-size: 0.86rem; text-align: right; }
+.cap-input:focus { border-color: #ff6b2c; outline: none; }
+.settings-mini { background: #f0f0f0; color: #333; border: 1px solid #ddd; border-radius: 6px; padding: 6px 10px; font-family: inherit; font-size: 0.76rem; cursor: pointer; }
+.settings-mini:hover { background: #e6e6e6; }
+.settings-hint { color: #999; font-size: 0.74rem; }
+.settings-save { background: #ff6b2c; color: #fff; border: none; border-radius: 7px; padding: 7px 14px; font-family: inherit; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+.settings-applied { color: #2f9e44; font-size: 0.74rem; margin-left: 8px; }
+.model-warn { border-radius: 6px; padding: 7px 10px; font-size: 0.78rem; margin-bottom: 8px; }
+.model-warn.error { background: #fdecea; border: 1px solid #f5b5ae; color: #b3261e; }
+.model-warn.warning { background: #fff7e6; border: 1px solid #ffd591; color: #8a5a00; }
+
 .billing-loading, .billing-empty { color: #999; padding: 30px 0; }
 
 .billing-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e6e6e6; border-radius: 10px; overflow: hidden; font-size: 0.84rem; }

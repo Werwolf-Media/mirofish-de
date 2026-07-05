@@ -20,7 +20,7 @@ from queue import Queue
 
 from ..config import Config
 from ..utils.logger import get_logger
-from ..utils.locale import get_locale, set_locale
+from ..utils.locale import get_locale, set_locale, t
 from .zep_graph_memory_updater import ZepGraphMemoryManager
 from .simulation_ipc import SimulationIPCClient, CommandType, IPCResponse
 
@@ -140,9 +140,15 @@ class SimulationRunState:
     
     # 错误信息
     error: Optional[str] = None
-    
+
     # 进程ID（用于停止）
     process_pid: Optional[int] = None
+
+    # Kosten-Wächter: laufende Kosten dieses Runs (OpenRouter-Delta in EUR),
+    # konfigurierter Deckel und ob der Deckel den Abbruch ausgelöst hat
+    current_cost_eur: Optional[float] = None
+    cost_limit_eur: Optional[float] = None
+    cost_cap_triggered: bool = False
     
     def add_action(self, action: AgentAction):
         """添加动作到最近动作列表"""
@@ -183,6 +189,9 @@ class SimulationRunState:
             "completed_at": self.completed_at,
             "error": self.error,
             "process_pid": self.process_pid,
+            "current_cost_eur": self.current_cost_eur,
+            "cost_limit_eur": self.cost_limit_eur,
+            "cost_cap_triggered": self.cost_cap_triggered,
         }
     
     def to_detail_dict(self) -> Dict[str, Any]:
@@ -432,6 +441,17 @@ class SimulationRunner:
             env = os.environ.copy()
             env['PYTHONUTF8'] = '1'  # Python 3.7+ 支持，让所有 open() 默认使用 UTF-8
             env['PYTHONIOENCODING'] = 'utf-8'  # 确保 stdout/stderr 使用 UTF-8
+
+            # Admin-Modell-Override (app_settings.json) an den Subprozess
+            # durchreichen — die Simulations-Skripte lesen LLM_MODEL_NAME aus env
+            try:
+                from ..models.app_settings import AppSettings
+                _model_override = AppSettings.llm_model()
+                if _model_override:
+                    env['LLM_MODEL_NAME'] = _model_override
+                    logger.info(f"Modell-Override aktiv (Admin): {_model_override}")
+            except Exception as _e:
+                logger.warning(f"Modell-Override konnte nicht gelesen werden: {_e}")
             
             # 设置工作目录为模拟目录（数据库等文件会生成在此）
             # 使用 start_new_session=True 创建新的进程组，确保可以通过 os.killpg 终止所有子进程
@@ -496,7 +516,63 @@ class SimulationRunner:
         
         twitter_position = 0
         reddit_position = 0
-        
+
+        # --- Kosten-Wächter vorbereiten ---------------------------------
+        # usage_start stammt aus dem Billing-Datensatz (Snapshot beim
+        # Projekt-Start). Delta zum aktuellen OpenRouter-Verbrauch = Kosten
+        # dieses Runs. Deckel aus Admin-Settings/.env; 0 = deaktiviert.
+        cost_usage_start = None
+        cost_limit_eur = 0.0
+        cost_last_check = 0.0
+        COST_CHECK_INTERVAL = 30  # Sekunden zwischen OpenRouter-Abfragen
+        try:
+            from ..models.app_settings import AppSettings
+            from ..models.billing import BillingManager
+            from .simulation_manager import SimulationManager
+            cost_limit_eur = AppSettings.max_cost_eur()
+            state.cost_limit_eur = cost_limit_eur if cost_limit_eur > 0 else None
+            sim = SimulationManager().get_simulation(simulation_id)
+            if sim and getattr(sim, 'project_id', None):
+                rec = BillingManager.get(sim.project_id)
+                if rec:
+                    cost_usage_start = rec.get('usage_start')
+        except Exception as _e:
+            logger.warning(f"Kosten-Wächter-Setup fehlgeschlagen: {_e}")
+
+        def _check_costs():
+            """Liest den OpenRouter-Verbrauch, aktualisiert die Live-Kosten
+            und bricht die Simulation ab, wenn der Deckel überschritten ist."""
+            nonlocal cost_last_check
+            if cost_usage_start is None:
+                return
+            now = time.time()
+            if now - cost_last_check < COST_CHECK_INTERVAL:
+                return
+            cost_last_check = now
+            try:
+                from ..utils.openrouter_cost import get_usage
+                usage_now = get_usage()
+                if usage_now is None:
+                    return
+                cost_eur = max(0.0, float(usage_now) - float(cost_usage_start)) * Config.EUR_PER_USD
+                state.current_cost_eur = round(cost_eur, 2)
+                if cost_limit_eur > 0 and cost_eur > cost_limit_eur:
+                    state.cost_cap_triggered = True
+                    state.error = t(
+                        'api.costCapExceeded',
+                        cost=f"{cost_eur:.2f}",
+                        limit=f"{cost_limit_eur:.2f}"
+                    )
+                    logger.error(
+                        f"KOSTEN-DECKEL überschritten ({cost_eur:.2f} EUR > "
+                        f"{cost_limit_eur:.2f} EUR) — breche Simulation {simulation_id} ab"
+                    )
+                    cls._save_run_state(state)
+                    cls._terminate_process(process, simulation_id)
+            except Exception as _e:
+                logger.warning(f"Kosten-Check fehlgeschlagen: {_e}")
+        # -----------------------------------------------------------------
+
         try:
             while process.poll() is None:  # 进程仍在运行
                 # 读取 Twitter 动作日志
@@ -504,13 +580,16 @@ class SimulationRunner:
                     twitter_position = cls._read_action_log(
                         twitter_actions_log, twitter_position, state, "twitter"
                     )
-                
+
                 # 读取 Reddit 动作日志
                 if os.path.exists(reddit_actions_log):
                     reddit_position = cls._read_action_log(
                         reddit_actions_log, reddit_position, state, "reddit"
                     )
-                
+
+                # Kosten-Wächter (alle 30s)
+                _check_costs()
+
                 # 更新状态
                 cls._save_run_state(state)
                 time.sleep(2)
@@ -523,8 +602,13 @@ class SimulationRunner:
             
             # 进程结束
             exit_code = process.returncode
-            
-            if exit_code == 0:
+
+            if state.cost_cap_triggered:
+                # Abbruch durch Kosten-Deckel: aussagekräftigen Fehlertext
+                # behalten, nicht mit generischem Exit-Code-Text überschreiben
+                state.runner_status = RunnerStatus.FAILED
+                logger.error(f"Simulation durch Kosten-Deckel beendet: {simulation_id}")
+            elif exit_code == 0:
                 state.runner_status = RunnerStatus.COMPLETED
                 state.completed_at = datetime.now().isoformat()
                 logger.info(f"模拟完成: {simulation_id}")

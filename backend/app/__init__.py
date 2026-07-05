@@ -106,7 +106,34 @@ def create_app(config_class=Config):
         return {'status': 'ok', 'service': 'MiroFish Backend'}
     
     if should_log_startup:
+        # Modell-Wächter: beim Start laut warnen, wenn ein teures oder
+        # inkompatibles Modell konfiguriert ist (Lektion aus dem 80-€-Run)
+        try:
+            from .models.app_settings import AppSettings
+            from .utils.model_guard import check_model, log_text
+            active_model = AppSettings.effective_llm_model()
+            logger.info(f"Aktives LLM-Modell: {active_model}"
+                        + (" (Admin-Override)" if AppSettings.llm_model() else " (.env)"))
+            for warning in check_model(active_model):
+                logger.warning("!" * 60)
+                logger.warning(f"MODELL-WARNUNG: {log_text(warning)}")
+                logger.warning("!" * 60)
+            cap = AppSettings.max_cost_eur()
+            if cap > 0:
+                logger.info(f"Kosten-Deckel pro Run: {cap:.2f} EUR")
+            else:
+                logger.warning("Kosten-Deckel DEAKTIVIERT (MAX_COST_EUR=0) — "
+                               "Runs können unbegrenzt Kosten verursachen")
+        except Exception as e:
+            logger.warning(f"Modell-Wächter-Startcheck fehlgeschlagen: {e}")
+
+        # Standard-Passwörter aktiv? Deutlich machen.
+        if Config.APP_PASSWORD == 'werwolf123#':
+            logger.warning("Standard-APP_PASSWORD aktiv — bitte in .env ändern")
+        if Config.ADMIN_PASSWORD == 'werwolf-admin#':
+            logger.warning("Standard-ADMIN_PASSWORD aktiv — bitte in .env ändern")
+
         logger.info("MiroFish Backend 启动完成")
-    
+
     return app
 

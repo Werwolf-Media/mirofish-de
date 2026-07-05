@@ -7,8 +7,10 @@ from flask import request, jsonify
 from . import billing_bp
 from ..config import Config
 from ..models.billing import BillingManager
+from ..models.app_settings import AppSettings
 from ..utils.auth import check_admin_token
 from ..utils.logger import get_logger
+from ..utils.model_guard import check_model, RECOMMENDED_MODEL
 
 logger = get_logger('mirofish.billing')
 
@@ -60,11 +62,27 @@ def list_billing():
     })
 
 
+def _settings_payload() -> dict:
+    """Alle Admin-Einstellungen inkl. LLM-Modell + Kosten-Deckel."""
+    effective_model = AppSettings.effective_llm_model()
+    data = dict(BillingManager.get_settings())
+    data.update({
+        "llm_model": effective_model,
+        "llm_model_override": AppSettings.llm_model(),  # None = .env-Wert aktiv
+        "llm_model_env": Config.LLM_MODEL_NAME,
+        "llm_model_recommended": RECOMMENDED_MODEL,
+        "model_warnings": check_model(effective_model),
+        "max_cost_eur": AppSettings.max_cost_eur(),
+        "max_cost_eur_env": max(0.0, Config.MAX_COST_EUR),
+    })
+    return data
+
+
 @billing_bp.route('/settings', methods=['GET'])
 def get_settings():
     if not _admin_ok():
         return jsonify({"success": False, "error": "admin_required"}), 401
-    return jsonify({"success": True, "data": BillingManager.get_settings()})
+    return jsonify({"success": True, "data": _settings_payload()})
 
 
 @billing_bp.route('/settings', methods=['POST'])
@@ -72,10 +90,29 @@ def set_settings():
     if not _admin_ok():
         return jsonify({"success": False, "error": "admin_required"}), 401
     data = request.get_json(silent=True) or {}
-    if 'default_billing_price_eur' not in data:
-        return jsonify({"success": False, "error": "price_required"}), 400
-    result = BillingManager.set_default_price(data['default_billing_price_eur'])
-    return jsonify({"success": True, "data": result})
+    handled = False
+
+    if 'default_billing_price_eur' in data:
+        BillingManager.set_default_price(data['default_billing_price_eur'])
+        handled = True
+
+    app_fields = {}
+    if 'llm_model' in data:
+        # Leerer String = Override löschen (zurück zur .env)
+        app_fields['llm_model'] = (data['llm_model'] or '').strip()
+        handled = True
+    if 'max_cost_eur' in data:
+        try:
+            app_fields['max_cost_eur'] = max(0.0, min(500.0, float(data['max_cost_eur'])))
+        except (TypeError, ValueError):
+            return jsonify({"success": False, "error": "invalid_max_cost"}), 400
+        handled = True
+    if app_fields:
+        AppSettings.set(app_fields)
+
+    if not handled:
+        return jsonify({"success": False, "error": "no_settings_given"}), 400
+    return jsonify({"success": True, "data": _settings_payload()})
 
 
 @billing_bp.route('/<project_id>/update', methods=['POST'])

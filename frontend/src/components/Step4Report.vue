@@ -85,6 +85,24 @@
           <span class="header-meta mono" v-if="activeStep.meta">{{ activeStep.meta }}</span>
         </div>
 
+        <!-- Fehler-Banner: Berichtserstellung fehlgeschlagen -->
+        <div class="report-failed-banner" v-if="isFailed">
+          <div class="rfb-title">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>{{ $t('step4.failedTitle') }}</span>
+          </div>
+          <div class="rfb-reason mono" v-if="failReason">{{ failReason }}</div>
+          <div class="rfb-hint">{{ $t('step4.failedHint') }}</div>
+          <button class="rfb-retry" :disabled="retrying" @click="retryReport">
+            <span v-if="retrying">{{ $t('step4.retrying') }}</span>
+            <span v-else>{{ $t('step4.retryButton') }}</span>
+          </button>
+        </div>
+
         <!-- Workflow Overview (flat, status-based palette) -->
         <div class="workflow-overview" v-if="agentLogs.length > 0 || reportOutline">
           <div class="workflow-metrics">
@@ -444,7 +462,7 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick, h, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { getAgentLog, getConsoleLog } from '../api/report'
+import { getAgentLog, getConsoleLog, generateReport } from '../api/report'
 import { createShare, deactivateShare, activateShare, resetShare } from '../api/share'
 import werwolfLogoRaw from '../assets/logo/werwolf-icon.svg?raw'
 
@@ -463,6 +481,29 @@ const emit = defineEmits(['add-log', 'update-status'])
 const goToInteraction = () => {
   if (props.reportId) {
     router.push({ name: 'Interaction', params: { reportId: props.reportId } })
+  }
+}
+
+// --- Fehlerzustand + erneuter Versuch ---
+const isFailed = ref(false)
+const failReason = ref('')
+const retrying = ref(false)
+
+const retryReport = async () => {
+  if (!props.simulationId || retrying.value) return
+  retrying.value = true
+  try {
+    const res = await generateReport({ simulation_id: props.simulationId, force_regenerate: true })
+    if (res.success && res.data?.report_id) {
+      // Neue Report-ID -> frische Ansicht laden
+      window.location.href = `/report/${res.data.report_id}`
+    } else {
+      failReason.value = res.error || failReason.value
+      retrying.value = false
+    }
+  } catch (e) {
+    failReason.value = e.message || String(e)
+    retrying.value = false
   }
 }
 
@@ -2308,19 +2349,45 @@ const extractFinalContent = (response) => {
   return null
 }
 
+// Erkennt eine fehlgeschlagene Berichtserstellung in den Konsolen-Logs und
+// blendet Klartext-Grund + Retry-Button ein (statt ewig "Generating").
+const detectFailure = (logLine) => {
+  if (isFailed.value) return
+  const line = String(logLine || '')
+  const isErr = /\bERROR\b|错误|Error code:|Traceback/.test(line)
+  const isReport = /Bericht|report|fehlgeschlagen|failed|生成/i.test(line)
+  if (!isErr || !isReport) return
+  isFailed.value = true
+  // Typische Fehlerklassen in Klartext übersetzen
+  if (/\b402\b|more credits|requires more credits|insufficient/i.test(line)) {
+    failReason.value = t('step4.failedCredits')
+  } else if (/\b429\b|rate.?limit/i.test(line)) {
+    failReason.value = t('step4.failedRateLimit')
+  } else {
+    // Timestamp-Präfix "[HH:MM:SS] ERROR:" entfernen, Rest als Grund zeigen
+    failReason.value = line
+      .replace(/^\[[^\]]*\]\s*/, '')
+      .replace(/^ERROR:?\s*/i, '')
+      .trim()
+      .slice(0, 400)
+  }
+  stopPolling()
+}
+
 const fetchConsoleLog = async () => {
   if (!props.reportId) return
-  
+
   try {
     const res = await getConsoleLog(props.reportId, consoleLogLine.value)
-    
+
     if (res.success && res.data) {
       const newLogs = res.data.logs || []
-      
+
       if (newLogs.length > 0) {
         consoleLogs.value.push(...newLogs)
         consoleLogLine.value = res.data.from_line + newLogs.length
-        
+        newLogs.forEach(detectFailure)
+
         nextTick(() => {
           if (logContent.value) {
             logContent.value.scrollTop = logContent.value.scrollHeight
@@ -3239,6 +3306,67 @@ watch(() => props.reportId, (newId) => {
 
 .info-val {
   color: #374151;
+}
+
+/* Fehler-Banner: Berichtserstellung fehlgeschlagen */
+.report-failed-banner {
+  margin: 0 0 16px;
+  padding: 16px 18px;
+  border: 1px solid #FCA5A5;
+  border-left: 3px solid #DC2626;
+  border-radius: 8px;
+  background: #FEF2F2;
+}
+
+.rfb-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #B91C1C;
+  font-size: 14px;
+}
+
+.rfb-reason {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #fff;
+  border: 1px solid #FECACA;
+  border-radius: 6px;
+  color: #7F1D1D;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.rfb-hint {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #991B1B;
+}
+
+.rfb-retry {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background: #DC2626;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.rfb-retry:hover:not(:disabled) {
+  background: #B91C1C;
+}
+
+.rfb-retry:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .status-message {

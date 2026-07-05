@@ -90,8 +90,16 @@
         </div>
       </div>
 
+      <!-- Live-Kosten dieses Runs (OpenRouter-Delta) + Kosten-Deckel -->
+      <div class="cost-badge" v-if="runStatus.current_cost_eur != null || runStatus.cost_limit_eur"
+           :class="{ 'cost-badge--danger': runStatus.cost_cap_triggered }">
+        <span class="cost-badge-label">{{ $t('step3.liveCost') }}</span>
+        <span class="cost-badge-value mono">€ {{ (runStatus.current_cost_eur || 0).toFixed(2) }}</span>
+        <span class="cost-badge-cap mono" v-if="runStatus.cost_limit_eur">/ {{ Number(runStatus.cost_limit_eur).toFixed(0) }} €</span>
+      </div>
+
       <div class="action-controls">
-        <button 
+        <button
           class="action-btn primary"
           :disabled="phase !== 2 || isGeneratingReport"
           @click="handleNextStep"
@@ -720,6 +728,29 @@ onUnmounted(() => {
   z-index: 10;
   height: 64px;
 }
+
+.cost-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  margin-left: auto;
+  margin-right: 12px;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.cost-badge--danger {
+  background: #FEF2F2;
+  border-color: #FCA5A5;
+  color: #B91C1C;
+}
+.cost-badge-label { color: #6B7280; text-transform: uppercase; letter-spacing: 0.3px; font-size: 10px; }
+.cost-badge--danger .cost-badge-label { color: #B91C1C; }
+.cost-badge-value { font-weight: 700; }
+.cost-badge-cap { color: #9CA3AF; }
 
 .status-group {
   display: flex;

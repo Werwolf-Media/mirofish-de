@@ -239,7 +239,8 @@
     "availableActions": "Available Actions",
     "simulationMonitor": "SIMULATION MONITOR",
     "platformInfoPlaza": "Info Plaza",
-    "platformTopicCommunity": "Topic Community"
+    "platformTopicCommunity": "Topic Community",
+    "liveCost": "Live cost"
   },
   "step4": {
     "generatingSection": "Generating {title}...",
@@ -318,7 +319,13 @@
     "predictionReport": "Prediction Report",
     "downloadPdf": "Download PDF",
     "pdfGeneratedOn": "Generated on {date}",
-    "pdfFooter": "Generated with MiroFish · Werwolf Media"
+    "pdfFooter": "Generated with MiroFish · Werwolf Media",
+    "failedTitle": "Report generation failed",
+    "failedHint": "The simulation data is preserved — you can regenerate the report without re-running the simulation.",
+    "retryButton": "Regenerate report",
+    "retrying": "Regenerating …",
+    "failedCredits": "OpenRouter credits/limit exhausted (error 402). Please top up credits or raise the key limit, then try again.",
+    "failedRateLimit": "Provider rate limit reached (error 429). Wait a moment and try again."
   },
   "step5": {
     "interactiveTools": "Interactive Tools",
@@ -467,7 +474,8 @@
     "germanSourcesNone": "No matching German sources found",
     "germanSourcesFailed": "Failed to fetch German sources: {error}",
     "loginInvalid": "Incorrect password",
-    "seedTextLabel": "Description (Assistant)"
+    "seedTextLabel": "Description (Assistant)",
+    "costCapExceeded": "Cost cap exceeded ({cost} € > {limit} €) — simulation aborted."
   },
   "progress": {
     "initGraphService": "Initializing graph build service...",
@@ -882,6 +890,17 @@
     "markOpen": "Mark as open",
     "delete": "Delete",
     "confirmDelete": "Really delete this entry?",
-    "openTotal": "Still to invoice"
+    "openTotal": "Still to invoice",
+    "settingsTitle": "Model & cost cap",
+    "activeModel": "Active LLM model",
+    "useRecommended": "Use recommended",
+    "modelOverrideActive": "Admin override active (overrides .env)",
+    "costCap": "Cost cap per run",
+    "costCapHint": "0 = disabled. If the OpenRouter delta exceeds this during a run, the simulation is aborted.",
+    "saveSettings": "Save",
+    "settingsApplied": "Applies immediately to new runs — no restart needed",
+    "modelWarn_reasoning": "\"{model}\" is a reasoning model — incompatible with MiroFish (parameter conflicts, hidden thinking tokens inflate every agent call).",
+    "modelWarn_expensive": "\"{model}\" is an expensive model — a single run can cost double-digit euros.",
+    "modelWarn_chinese": "\"{model}\" tends to produce Chinese output despite the language directive."
   }
 }
