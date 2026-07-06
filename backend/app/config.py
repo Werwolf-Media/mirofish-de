@@ -52,6 +52,9 @@ class Config:
     # Im Admin-Bereich (Abrechnung) zur Laufzeit überschreibbar.
     MAX_COST_EUR = float(os.environ.get('MAX_COST_EUR', '15'))
     
+    # Maschinen-Schnittstelle /api/v1 (für andere Tools). Leer = deaktiviert.
+    EXTERNAL_API_KEY = os.environ.get('EXTERNAL_API_KEY', '')
+
     # Zep配置
     ZEP_API_KEY = os.environ.get('ZEP_API_KEY')
     

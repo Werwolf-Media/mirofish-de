@@ -59,11 +59,13 @@ def create_app(config_class=Config):
         # - /health, Login + Admin-Login
         # - /api/shared/ (Empfänger geteilter Links)
         # - /api/billing/ (eigenes Admin-Token wird dort INTERN geprüft)
+        # - /api/v1/ (Maschinen-API: eigener API-Key wird dort INTERN geprüft)
         if path == '/health' \
                 or path.rstrip('/') == '/api/auth/login' \
                 or path.rstrip('/') == '/api/auth/admin-login' \
                 or path.startswith('/api/shared/') \
-                or path.startswith('/api/billing/'):
+                or path.startswith('/api/billing/') \
+                or path.startswith('/api/v1/'):
             return None
         if path.startswith('/api/'):
             token = request.headers.get('X-App-Token', '')
@@ -90,7 +92,7 @@ def create_app(config_class=Config):
         return response
     
     # 注册蓝图
-    from .api import graph_bp, simulation_bp, report_bp, auth_bp, wizard_bp, share_bp, shared_bp, billing_bp
+    from .api import graph_bp, simulation_bp, report_bp, auth_bp, wizard_bp, share_bp, shared_bp, billing_bp, external_bp
     app.register_blueprint(graph_bp, url_prefix='/api/graph')
     app.register_blueprint(simulation_bp, url_prefix='/api/simulation')
     app.register_blueprint(report_bp, url_prefix='/api/report')
@@ -99,6 +101,7 @@ def create_app(config_class=Config):
     app.register_blueprint(share_bp, url_prefix='/api/share')      # Verwaltung (Login nötig)
     app.register_blueprint(shared_bp, url_prefix='/api/shared')    # öffentlich (token-scoped)
     app.register_blueprint(billing_bp, url_prefix='/api/billing')  # Abrechnung (Login nötig)
+    app.register_blueprint(external_bp, url_prefix='/api/v1')      # Maschinen-API (eigener API-Key)
     
     # 健康检查
     @app.route('/health')
@@ -132,6 +135,17 @@ def create_app(config_class=Config):
             logger.warning("Standard-APP_PASSWORD aktiv — bitte in .env ändern")
         if Config.ADMIN_PASSWORD == 'werwolf-admin#':
             logger.warning("Standard-ADMIN_PASSWORD aktiv — bitte in .env ändern")
+
+        # Maschinen-API: Status loggen + verwaiste Runs bereinigen
+        try:
+            from .services.external_pipeline import ExternalRunManager
+            ExternalRunManager.recover_stale()
+            if Config.EXTERNAL_API_KEY:
+                logger.info("Maschinen-API /api/v1 aktiv (EXTERNAL_API_KEY gesetzt)")
+            else:
+                logger.info("Maschinen-API /api/v1 deaktiviert (kein EXTERNAL_API_KEY)")
+        except Exception as e:
+            logger.warning(f"Maschinen-API-Startcheck fehlgeschlagen: {e}")
 
         logger.info("MiroFish Backend 启动完成")
 

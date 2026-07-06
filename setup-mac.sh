@@ -69,6 +69,13 @@ APP_PASSWORD=werwolf123#
 
 # ===== Admin (nur Inhaber) - schaltet die Abrechnung/Margen frei. BITTE aendern! =====
 ADMIN_PASSWORD=werwolf-admin#
+
+# ===== Kosten-Deckel pro Run in EUR (0 = aus; im Admin zur Laufzeit aenderbar) =====
+MAX_COST_EUR=15
+
+# ===== Maschinen-API /api/v1 fuer andere Tools (leer = deaktiviert) =====
+# Key erzeugen z. B. mit:  openssl rand -hex 24
+EXTERNAL_API_KEY=
 ENVEOF
   echo "==> .env-Vorlage angelegt."
 fi
