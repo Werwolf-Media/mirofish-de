@@ -521,11 +521,11 @@ const fetchRunStatus = async () => {
       
       // 检测模拟是否已完成（通过 runner_status 或平台完成状态判断）
       const isCompleted = data.runner_status === 'completed' || data.runner_status === 'stopped'
-      
+
       // 额外检查：如果后端还没来得及更新 runner_status，但平台已经报告完成
       // 通过检测 twitter_completed 和 reddit_completed 状态判断
       const platformsCompleted = checkPlatformsCompleted(data)
-      
+
       if (isCompleted || platformsCompleted) {
         if (platformsCompleted && !isCompleted) {
           addLog(t('log.allPlatformsCompleted'))
@@ -534,6 +534,16 @@ const fetchRunStatus = async () => {
         phase.value = 2
         stopPolling()
         emit('update-status', 'completed')
+      } else if (data.runner_status === 'failed') {
+        // Abbruch (OOM/Kosten-Deckel/Fehler): nicht ewig "Running" zeigen.
+        // Gesammelte Daten bleiben nutzbar -> Bericht-Button freischalten.
+        const reason = (data.error || '').split('\n')[0].slice(0, 200)
+        addLog(`${t('step3.simFailed')}${reason ? ' — ' + reason : ''}`)
+        if (data.cost_cap_triggered) addLog(t('step3.costCapHit'))
+        addLog(t('step3.failedButReport'))
+        phase.value = 2
+        stopPolling()
+        emit('update-status', 'failed')
       }
     }
   } catch (err) {

@@ -240,7 +240,10 @@
     "simulationMonitor": "SIMULATIONS-MONITOR",
     "platformInfoPlaza": "Info-Plaza",
     "platformTopicCommunity": "Themen-Community",
-    "liveCost": "Live-Kosten"
+    "liveCost": "Live-Kosten",
+    "simFailed": "Simulation abgebrochen",
+    "costCapHit": "Kosten-Deckel wurde ausgelöst.",
+    "failedButReport": "Die bisher gesammelten Daten sind nutzbar — Bericht kann generiert werden."
   },
   "step4": {
     "generatingSection": "{title} wird generiert ...",

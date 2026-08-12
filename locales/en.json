@@ -240,7 +240,10 @@
     "simulationMonitor": "SIMULATION MONITOR",
     "platformInfoPlaza": "Info Plaza",
     "platformTopicCommunity": "Topic Community",
-    "liveCost": "Live cost"
+    "liveCost": "Live cost",
+    "simFailed": "Simulation aborted",
+    "costCapHit": "Cost cap was triggered.",
+    "failedButReport": "Collected data is still usable — the report can be generated."
   },
   "step4": {
     "generatingSection": "Generating {title}...",

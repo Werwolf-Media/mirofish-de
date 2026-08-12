@@ -240,7 +240,10 @@
     "simulationMonitor": "模拟监视器",
     "platformInfoPlaza": "信息广场",
     "platformTopicCommunity": "话题社区",
-    "liveCost": "实时成本"
+    "liveCost": "实时成本",
+    "simFailed": "模拟已中止",
+    "costCapHit": "已触发成本上限。",
+    "failedButReport": "已收集的数据仍然可用——可以生成报告。"
   },
   "step4": {
     "generatingSection": "正在生成{title}...",
