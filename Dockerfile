@@ -1,29 +1,44 @@
-FROM python:3.11
+# MiroFish — ein Container für Backend (Flask) + Frontend (Vite-Build).
+# Flask liefert die gebauten statischen Dateien selbst aus (kein nginx nötig,
+# vermeidet die Coolify-Falle "zwei Apps, getrennte Docker-Netze").
 
-# 安装 Node.js （满足 >=18）及必要工具
+# ---- Stage 1: Frontend bauen ----
+FROM node:22-slim AS frontend
+WORKDIR /build
+COPY frontend/package.json frontend/package-lock.json frontend/
+RUN cd frontend && npm ci
+COPY frontend/ frontend/
+# i18n wird zur Build-Zeit per Glob aus ../locales importiert
+COPY locales/ locales/
+RUN cd frontend && npm run build
+
+# ---- Stage 2: Backend + statisches Frontend ----
+FROM python:3.12-slim
+
+# Debug-Reloader wuerde den Prozess doppeln und Orchestrator-Threads killen
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONUTF8=1 \
+    FLASK_DEBUG=False \
+    FLASK_HOST=0.0.0.0 \
+    FLASK_PORT=5001
+
+# build-essential: einzelne Python-Wheels (camel-ai-Kette) kompilieren nach
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends nodejs npm \
-  && rm -rf /var/lib/apt/lists/*
-
-# 从 uv 官方镜像复制 uv
-COPY --from=ghcr.io/astral-sh/uv:0.9.26 /uv /uvx /bin/
+    && apt-get install -y --no-install-recommends build-essential curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir uv
 
 WORKDIR /app
 
-# 先复制依赖描述文件以利用缓存
-COPY package.json package-lock.json ./
-COPY frontend/package.json frontend/package-lock.json ./frontend/
-COPY backend/pyproject.toml backend/uv.lock ./backend/
+# Dependencies zuerst (Docker-Layer-Cache: aendert sich selten)
+COPY backend/pyproject.toml backend/uv.lock backend/
+RUN cd backend && uv sync --frozen --no-dev --no-install-project
 
-# 安装依赖（Node + Python）
-RUN npm ci \
-  && npm ci --prefix frontend \
-  && cd backend && uv sync --frozen
+COPY backend/ backend/
+COPY locales/ locales/
+COPY --from=frontend /build/frontend/dist frontend/dist
 
-# 复制项目源码
-COPY . .
+EXPOSE 5001
 
-EXPOSE 4280 5001
-
-# 同时启动前后端（开发模式）
-CMD ["npm", "run", "dev"]
+WORKDIR /app/backend
+CMD ["uv", "run", "--no-sync", "python", "run.py"]

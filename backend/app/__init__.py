@@ -107,6 +107,30 @@ def create_app(config_class=Config):
     @app.route('/health')
     def health():
         return {'status': 'ok', 'service': 'MiroFish Backend'}
+
+    # Frontend ausliefern (Produktions-Container): Vite-Build aus frontend/dist.
+    # Lokal (npm run dev) existiert das Verzeichnis nicht -> Route bleibt aus,
+    # Vite-Dev-Server uebernimmt wie gehabt.
+    frontend_dist = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '../../frontend/dist')
+    )
+    if os.path.isdir(frontend_dist):
+        from flask import send_from_directory
+
+        @app.route('/', defaults={'path': ''})
+        @app.route('/<path:path>')
+        def serve_frontend(path):
+            # API-Pfade nie mit index.html beantworten
+            if path.startswith('api/'):
+                return jsonify({"success": False, "error": "not_found"}), 404
+            candidate = os.path.join(frontend_dist, path)
+            if path and os.path.isfile(candidate):
+                return send_from_directory(frontend_dist, path)
+            # Vue-Router-Pfade (/billing, /share/<token>, ...) -> SPA-Einstieg
+            return send_from_directory(frontend_dist, 'index.html')
+
+        if should_log_startup:
+            logger.info(f"Frontend-Auslieferung aktiv: {frontend_dist}")
     
     if should_log_startup:
         # Modell-Wächter: beim Start laut warnen, wenn ein teures oder
