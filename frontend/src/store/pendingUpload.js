@@ -9,6 +9,7 @@ const state = reactive({
   simulationRequirement: '',
   includeGermanSources: false,
   seedText: '',
+  groupId: '',
   isPending: false
 })
 
@@ -17,6 +18,17 @@ export function setPendingUpload(files, requirement, includeGermanSources = fals
   state.simulationRequirement = requirement
   state.includeGermanSources = includeGermanSources
   state.seedText = seedText
+  state.groupId = ''
+  state.isPending = true
+}
+
+// Neuer Run in einer Projektmappe: Seed liegt serverseitig, nur Prompt noetig
+export function setPendingGroupRun(groupId, requirement, includeGermanSources = false) {
+  state.files = []
+  state.simulationRequirement = requirement
+  state.includeGermanSources = includeGermanSources
+  state.seedText = ''
+  state.groupId = groupId
   state.isPending = true
 }
 
@@ -26,6 +38,7 @@ export function getPendingUpload() {
     simulationRequirement: state.simulationRequirement,
     includeGermanSources: state.includeGermanSources,
     seedText: state.seedText,
+    groupId: state.groupId,
     isPending: state.isPending
   }
 }
@@ -35,6 +48,7 @@ export function clearPendingUpload() {
   state.simulationRequirement = ''
   state.includeGermanSources = false
   state.seedText = ''
+  state.groupId = ''
   state.isPending = false
 }
 

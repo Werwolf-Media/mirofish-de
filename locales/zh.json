@@ -903,5 +903,31 @@
     "modelWarn_reasoning": "“{model}”是推理模型——可通过兼容层运行，但隐藏的思考 token 会显著抬高每次 agent 调用的成本。",
     "modelWarn_expensive": "“{model}”是昂贵模型——单次运行可能花费两位数欧元。",
     "modelWarn_chinese": "“{model}”即使有语言指令也倾向于输出中文。"
+  },
+  "groups": {
+    "title": "项目",
+    "subtitle": "固定的现实种子——用不同提示词运行任意多次",
+    "create": "新建项目",
+    "name": "项目名称",
+    "namePlaceholder": "例如：客户Müller——网站上线",
+    "seedFiles": "种子文档",
+    "seedText": "种子文本",
+    "seedTextPlaceholder": "可选的文字背景（目标群体、产品、市场环境……）",
+    "optional": "可选",
+    "createBtn": "创建项目",
+    "creating": "创建中……",
+    "empty": "还没有项目——创建一个，在同一种子上运行多次模拟。",
+    "files": "个文件",
+    "runs": "次运行",
+    "noRuns": "此项目还没有运行记录。",
+    "newRunPlaceholder": "下一次运行的提示词——要模拟/预测什么？",
+    "startRun": "开始运行",
+    "starting": "启动中……",
+    "delete": "删除项目",
+    "confirmDelete": "删除项目“{name}”？已有的运行/报告将保留在历史记录中。",
+    "seedTextLabel": "种子文本",
+    "nameRequired": "请填写项目名称。",
+    "seedRequired": "请至少提供一个种子文档（PDF/MD/TXT）或种子文本。",
+    "notFound": "未找到项目。"
   }
 }

@@ -903,5 +903,31 @@
     "modelWarn_reasoning": "„{model}\" ist ein Reasoning-Modell — läuft über den Kompatibilitäts-Layer, aber versteckte Denk-Tokens verteuern jeden Agent-Call erheblich.",
     "modelWarn_expensive": "„{model}\" ist ein teures Modell — ein Run kann zweistellige EUR-Beträge kosten.",
     "modelWarn_chinese": "„{model}\" neigt trotz Sprachvorgabe zu chinesischer Ausgabe."
+  },
+  "groups": {
+    "title": "Projekte",
+    "subtitle": "Fester Realitäts-Seed — beliebig viele Runs mit unterschiedlichen Prompts",
+    "create": "Neues Projekt anlegen",
+    "name": "Projektname",
+    "namePlaceholder": "z. B. Kunde Müller – Website-Launch",
+    "seedFiles": "Seed-Dokumente",
+    "seedText": "Seed-Text",
+    "seedTextPlaceholder": "Optionaler Kontext als Text (Zielgruppe, Produkt, Marktumfeld …)",
+    "optional": "optional",
+    "createBtn": "Projekt anlegen",
+    "creating": "Wird angelegt …",
+    "empty": "Noch keine Projekte — leg das erste an und starte mehrere Runs auf demselben Seed.",
+    "files": "Datei(en)",
+    "runs": "Run(s)",
+    "noRuns": "Noch keine Runs in diesem Projekt.",
+    "newRunPlaceholder": "Prompt für den nächsten Run — was soll simuliert/prognostiziert werden?",
+    "startRun": "Run starten",
+    "starting": "Startet …",
+    "delete": "Projekt löschen",
+    "confirmDelete": "Projekt \"{name}\" löschen? Die bisherigen Runs/Berichte bleiben im Verlauf erhalten.",
+    "seedTextLabel": "Seed-Text",
+    "nameRequired": "Bitte einen Projektnamen angeben.",
+    "seedRequired": "Bitte mindestens ein Seed-Dokument (PDF/MD/TXT) oder einen Seed-Text angeben.",
+    "notFound": "Projekt nicht gefunden."
   }
 }

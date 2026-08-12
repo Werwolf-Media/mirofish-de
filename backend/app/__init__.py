@@ -92,7 +92,7 @@ def create_app(config_class=Config):
         return response
     
     # 注册蓝图
-    from .api import graph_bp, simulation_bp, report_bp, auth_bp, wizard_bp, share_bp, shared_bp, billing_bp, external_bp
+    from .api import graph_bp, simulation_bp, report_bp, auth_bp, wizard_bp, share_bp, shared_bp, billing_bp, external_bp, groups_bp
     app.register_blueprint(graph_bp, url_prefix='/api/graph')
     app.register_blueprint(simulation_bp, url_prefix='/api/simulation')
     app.register_blueprint(report_bp, url_prefix='/api/report')
@@ -102,6 +102,7 @@ def create_app(config_class=Config):
     app.register_blueprint(shared_bp, url_prefix='/api/shared')    # öffentlich (token-scoped)
     app.register_blueprint(billing_bp, url_prefix='/api/billing')  # Abrechnung (Login nötig)
     app.register_blueprint(external_bp, url_prefix='/api/v1')      # Maschinen-API (eigener API-Key)
+    app.register_blueprint(groups_bp, url_prefix='/api/groups')    # Projektmappen (Login nötig)
     
     # 健康检查
     @app.route('/health')

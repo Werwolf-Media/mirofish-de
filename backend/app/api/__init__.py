@@ -13,6 +13,7 @@ share_bp = Blueprint('share', __name__)
 shared_bp = Blueprint('shared', __name__)
 billing_bp = Blueprint('billing', __name__)
 external_bp = Blueprint('external', __name__)
+groups_bp = Blueprint('groups', __name__)
 
 from . import graph  # noqa: E402, F401
 from . import simulation  # noqa: E402, F401
@@ -23,4 +24,5 @@ from . import share  # noqa: E402, F401
 from . import shared  # noqa: E402, F401
 from . import billing  # noqa: E402, F401
 from . import external  # noqa: E402, F401
+from . import groups  # noqa: E402, F401
 

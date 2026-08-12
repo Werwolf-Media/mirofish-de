@@ -903,5 +903,31 @@
     "modelWarn_reasoning": "\"{model}\" is a reasoning model — it works via the compatibility layer, but hidden thinking tokens make every agent call significantly more expensive.",
     "modelWarn_expensive": "\"{model}\" is an expensive model — a single run can cost double-digit euros.",
     "modelWarn_chinese": "\"{model}\" tends to produce Chinese output despite the language directive."
+  },
+  "groups": {
+    "title": "Projects",
+    "subtitle": "One fixed reality seed — any number of runs with different prompts",
+    "create": "Create new project",
+    "name": "Project name",
+    "namePlaceholder": "e.g. Client Miller – website launch",
+    "seedFiles": "Seed documents",
+    "seedText": "Seed text",
+    "seedTextPlaceholder": "Optional context as text (audience, product, market …)",
+    "optional": "optional",
+    "createBtn": "Create project",
+    "creating": "Creating …",
+    "empty": "No projects yet — create one and run multiple simulations on the same seed.",
+    "files": "file(s)",
+    "runs": "run(s)",
+    "noRuns": "No runs in this project yet.",
+    "newRunPlaceholder": "Prompt for the next run — what should be simulated/predicted?",
+    "startRun": "Start run",
+    "starting": "Starting …",
+    "delete": "Delete project",
+    "confirmDelete": "Delete project \"{name}\"? Past runs/reports remain in the history.",
+    "seedTextLabel": "Seed text",
+    "nameRequired": "Please provide a project name.",
+    "seedRequired": "Please provide at least one seed document (PDF/MD/TXT) or a seed text.",
+    "notFound": "Project not found."
   }
 }

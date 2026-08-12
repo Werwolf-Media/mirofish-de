@@ -270,7 +270,30 @@ class ProjectManager:
             "path": file_path,
             "size": file_size
         }
-    
+
+    @classmethod
+    def copy_file_to_project(cls, project_id: str, src_path: str, original_filename: str) -> Dict[str, str]:
+        """
+        Serverseitig gespeicherte Datei (z. B. Projekt-Seed einer Projektmappe)
+        in das Projektverzeichnis kopieren — Gegenstueck zu save_file_to_project
+        fuer Dateien, die nicht als Upload hereinkommen.
+        """
+        files_dir = cls._get_project_files_dir(project_id)
+        os.makedirs(files_dir, exist_ok=True)
+
+        ext = os.path.splitext(original_filename)[1].lower()
+        safe_filename = f"{uuid.uuid4().hex[:8]}{ext}"
+        file_path = os.path.join(files_dir, safe_filename)
+
+        shutil.copyfile(src_path, file_path)
+
+        return {
+            "original_filename": original_filename,
+            "saved_filename": safe_filename,
+            "path": file_path,
+            "size": os.path.getsize(file_path)
+        }
+
     @classmethod
     def save_extracted_text(cls, project_id: str, text: str) -> None:
         """保存提取的文本"""

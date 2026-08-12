@@ -120,68 +120,34 @@ def reset_project(project_id: str):
 
 # ============== 接口1：上传文件并生成本体 ==============
 
-@graph_bp.route('/ontology/generate', methods=['POST'])
-def generate_ontology():
+class OntologyInputError(ValueError):
+    """400er-Fall: fehlendes oder unbrauchbares Seed-Material."""
+
+
+class OntologyPipelineFailure(Exception):
+    """Pipeline nach Projekt-Anlage gescheitert — traegt das Projekt fuer das Fehler-Handling."""
+
+    def __init__(self, project, cause):
+        super().__init__(str(cause))
+        self.project = project
+        self.cause = cause
+
+
+def run_ontology_pipeline(project_name, simulation_requirement, additional_context='',
+                          include_german_sources=False, seed_text='',
+                          incoming_files=None, disk_files=None, billing_name=None):
     """
-    接口1：上传文件，分析生成本体定义
-    
-    请求方式：multipart/form-data
-    
-    参数：
-        files: 上传的文件（PDF/MD/TXT），可多个
-        simulation_requirement: 模拟需求描述（必填）
-        project_name: 项目名称（可选）
-        additional_context: 额外说明（可选）
-        
-    返回：
-        {
-            "success": true,
-            "data": {
-                "project_id": "proj_xxxx",
-                "ontology": {
-                    "entity_types": [...],
-                    "edge_types": [...],
-                    "analysis_summary": "..."
-                },
-                "files": [...],
-                "total_text_length": 12345
-            }
-        }
+    Kern von Schritt 1 (Ontologie-Generierung): Projekt anlegen, Seed-Material
+    einlesen, Ontologie generieren. Genutzt von /api/graph/ontology/generate
+    (Browser-Upload) UND /api/groups/<id>/run (serverseitiger Projekt-Seed).
+
+    incoming_files: Liste von FileStorage (Upload)
+    disk_files:     Liste von (original_name, dateipfad) — bereits auf Platte
+    Rueckgabe: data-Dict (wie im API-Response); wirft OntologyInputError (400)
+    oder OntologyPipelineFailure (Projekt existiert, Schritt gescheitert).
     """
-    project = None
+    project = ProjectManager.create_project(name=project_name)
     try:
-        logger.info("=== 开始生成本体定义 ===")
-
-        # 获取参数
-        simulation_requirement = request.form.get('simulation_requirement', '')
-        project_name = request.form.get('project_name', 'Unnamed Project')
-        additional_context = request.form.get('additional_context', '')
-        include_german_sources = request.form.get('include_german_sources', '') \
-            .strip().lower() in ('1', 'true', 'yes', 'on')
-        # Optionaler Seed-Text (z. B. strukturierte Beschreibung aus dem Onboarding-Assistenten)
-        seed_text = request.form.get('seed_text', '').strip()
-
-        logger.debug(f"项目名称: {project_name}")
-        logger.debug(f"模拟需求: {simulation_requirement[:100]}...")
-
-        if not simulation_requirement:
-            return jsonify({
-                "success": False,
-                "error": t('api.requireSimulationRequirement')
-            }), 400
-
-        # 获取上传的文件
-        uploaded_files = request.files.getlist('files')
-        has_files = bool(uploaded_files) and any(f.filename for f in uploaded_files)
-        # Seed-Material kann aus Dateien, einem seed_text oder den deutschen Quellen stammen
-        if not has_files and not seed_text and not include_german_sources:
-            return jsonify({
-                "success": False,
-                "error": t('api.requireFileUpload')
-            }), 400
-        
-        # 创建项目
-        project = ProjectManager.create_project(name=project_name)
         project.simulation_requirement = simulation_requirement
         logger.info(f"创建项目: {project.project_id}")
 
@@ -189,32 +155,37 @@ def generate_ontology():
         try:
             from ..models.billing import BillingManager
             from ..utils.openrouter_cost import get_usage as _or_usage
-            BillingManager.start(project.project_id, project_name, simulation_requirement, _or_usage())
+            BillingManager.start(project.project_id, billing_name or project_name,
+                                 simulation_requirement, _or_usage())
         except Exception as _e:
             logger.warning(f"Abrechnung Start-Hook fehlgeschlagen: {_e}")
-        
-        # 保存文件并提取文本
+
+        # Seed-Material einlesen und Text extrahieren
         document_texts = []
         all_text = ""
-        
-        for file in uploaded_files:
+
+        def _ingest(file_info):
+            nonlocal all_text
+            project.files.append({
+                "filename": file_info["original_filename"],
+                "size": file_info["size"]
+            })
+            text = FileParser.extract_text(file_info["path"])
+            text = TextProcessor.preprocess_text(text)
+            document_texts.append(text)
+            all_text += f"\n\n=== {file_info['original_filename']} ===\n{text}"
+
+        for file in (incoming_files or []):
             if file and file.filename and allowed_file(file.filename):
-                # 保存文件到项目目录
-                file_info = ProjectManager.save_file_to_project(
-                    project.project_id, 
-                    file, 
-                    file.filename
-                )
-                project.files.append({
-                    "filename": file_info["original_filename"],
-                    "size": file_info["size"]
-                })
-                
-                # 提取文本
-                text = FileParser.extract_text(file_info["path"])
-                text = TextProcessor.preprocess_text(text)
-                document_texts.append(text)
-                all_text += f"\n\n=== {file_info['original_filename']} ===\n{text}"
+                _ingest(ProjectManager.save_file_to_project(
+                    project.project_id, file, file.filename
+                ))
+
+        for original_name, src_path in (disk_files or []):
+            if allowed_file(original_name) and os.path.isfile(src_path):
+                _ingest(ProjectManager.copy_file_to_project(
+                    project.project_id, src_path, original_name
+                ))
 
         # Seed-Text (z. B. strukturierte Beschreibung aus dem Onboarding-Assistenten)
         if seed_text:
@@ -226,7 +197,7 @@ def generate_ontology():
                 "size": len(processed_seed)
             })
 
-        # Opt-in: aktuelle deutsche Quellen als zusätzliches Seed-Material einbinden
+        # Opt-in: aktuelle deutsche Quellen als zusaetzliches Seed-Material einbinden
         german_sources_count = 0
         if include_german_sources:
             logger.info(t('api.germanSourcesFetching'))
@@ -249,17 +220,14 @@ def generate_ontology():
 
         if not document_texts:
             ProjectManager.delete_project(project.project_id)
-            return jsonify({
-                "success": False,
-                "error": t('api.noDocProcessed')
-            }), 400
-        
-        # 保存提取的文本
+            raise OntologyInputError(t('api.noDocProcessed'))
+
+        # Extrahierten Text speichern
         project.total_text_length = len(all_text)
         ProjectManager.save_extracted_text(project.project_id, all_text)
         logger.info(f"文本提取完成，共 {len(all_text)} 字符")
-        
-        # 生成本体
+
+        # Ontologie generieren
         logger.info("调用 LLM 生成本体定义...")
         generator = OntologyGenerator()
         ontology = generator.generate(
@@ -267,12 +235,11 @@ def generate_ontology():
             simulation_requirement=simulation_requirement,
             additional_context=additional_context if additional_context else None
         )
-        
-        # 保存本体到项目
+
         entity_count = len(ontology.get("entity_types", []))
         edge_count = len(ontology.get("edge_types", []))
         logger.info(f"本体生成完成: {entity_count} 个实体类型, {edge_count} 个关系类型")
-        
+
         project.ontology = {
             "entity_types": ontology.get("entity_types", []),
             "edge_types": ontology.get("edge_types", [])
@@ -281,72 +248,127 @@ def generate_ontology():
         project.status = ProjectStatus.ONTOLOGY_GENERATED
         ProjectManager.save_project(project)
         logger.info(f"=== 本体生成完成 === 项目ID: {project.project_id}")
-        
-        return jsonify({
-            "success": True,
-            "data": {
-                "project_id": project.project_id,
-                "project_name": project.name,
-                "ontology": project.ontology,
-                "analysis_summary": project.analysis_summary,
-                "files": project.files,
-                "total_text_length": project.total_text_length,
-                "german_sources_count": german_sources_count
-            }
-        })
-        
-    except Exception as error:
-        # Upstream-Fix portiert: Klartext-Fehler statt rohem Traceback ans
-        # Frontend; Provider-Bodies können Request-Inhalte echoen und werden
-        # deshalb nicht serialisiert.
-        provider_status = getattr(error, "status_code", None)
-        request_id = getattr(error, "request_id", None)
 
-        from ..utils.llm_client import LLMResponseError
-        if isinstance(error, LLMResponseError):
-            public_error = str(error)
-            response_status = 502
-            logger.exception("LLM returned an unusable ontology response")
-        elif isinstance(provider_status, int):
-            public_error = f"LLM provider request failed (HTTP {provider_status})"
-            if request_id:
-                import re as _re
-                safe_request_id = _re.sub(
-                    r"[^a-zA-Z0-9._:-]", "", str(request_id)
-                )[:128]
-                if safe_request_id:
-                    public_error += f" (request_id: {safe_request_id})"
-            response_status = 502
-            logger.error(
-                "Ontology provider request failed: type=%s status=%s request_id=%s",
-                type(error).__name__,
-                provider_status,
-                request_id or "unknown",
-            )
-        else:
-            public_error = str(error) or "Ontology generation failed"
-            response_status = 500
-            logger.exception("Unexpected ontology generation failure")
-
-        response_data = None
-        if project is not None:
-            project.status = ProjectStatus.FAILED
-            try:
-                ProjectManager.save_project(project)
-            except Exception:
-                logger.exception(
-                    "Failed to persist ontology failure for project %s",
-                    project.project_id,
-                )
-            response_data = {"project_id": project.project_id}
-
-        payload = {
-            "success": False,
-            "error": public_error,
+        return {
+            "project_id": project.project_id,
+            "project_name": project.name,
+            "ontology": project.ontology,
+            "analysis_summary": project.analysis_summary,
+            "files": project.files,
+            "total_text_length": project.total_text_length,
+            "german_sources_count": german_sources_count
         }
-        if response_data is not None:
-            payload["data"] = response_data
-        return jsonify(payload), response_status
+    except OntologyInputError:
+        raise
+    except Exception as e:
+        raise OntologyPipelineFailure(project, e)
+
+
+def ontology_error_response(error, project):
+    """
+    Upstream-Fix portiert: Klartext-Fehler statt rohem Traceback ans Frontend;
+    Provider-Bodies koennen Request-Inhalte echoen und werden nicht serialisiert.
+    Gemeinsames Fehler-Handling fuer /ontology/generate und /api/groups/<id>/run.
+    """
+    provider_status = getattr(error, "status_code", None)
+    request_id = getattr(error, "request_id", None)
+
+    from ..utils.llm_client import LLMResponseError
+    if isinstance(error, LLMResponseError):
+        public_error = str(error)
+        response_status = 502
+        logger.exception("LLM returned an unusable ontology response")
+    elif isinstance(provider_status, int):
+        public_error = f"LLM provider request failed (HTTP {provider_status})"
+        if request_id:
+            import re as _re
+            safe_request_id = _re.sub(
+                r"[^a-zA-Z0-9._:-]", "", str(request_id)
+            )[:128]
+            if safe_request_id:
+                public_error += f" (request_id: {safe_request_id})"
+        response_status = 502
+        logger.error(
+            "Ontology provider request failed: type=%s status=%s request_id=%s",
+            type(error).__name__,
+            provider_status,
+            request_id or "unknown",
+        )
+    else:
+        public_error = str(error) or "Ontology generation failed"
+        response_status = 500
+        logger.exception("Unexpected ontology generation failure")
+
+    response_data = None
+    if project is not None:
+        project.status = ProjectStatus.FAILED
+        try:
+            ProjectManager.save_project(project)
+        except Exception:
+            logger.exception(
+                "Failed to persist ontology failure for project %s",
+                project.project_id,
+            )
+        response_data = {"project_id": project.project_id}
+
+    payload = {
+        "success": False,
+        "error": public_error,
+    }
+    if response_data is not None:
+        payload["data"] = response_data
+    return jsonify(payload), response_status
+
+
+@graph_bp.route('/ontology/generate', methods=['POST'])
+def generate_ontology():
+    """
+    接口1：上传文件，分析生成本体定义（multipart/form-data）
+
+    参数: files (PDF/MD/TXT, mehrere) · simulation_requirement (Pflicht)
+          · project_name · additional_context · seed_text · include_german_sources
+    """
+    try:
+        logger.info("=== 开始生成本体定义 ===")
+
+        simulation_requirement = request.form.get('simulation_requirement', '')
+        project_name = request.form.get('project_name', 'Unnamed Project')
+        additional_context = request.form.get('additional_context', '')
+        include_german_sources = request.form.get('include_german_sources', '') \
+            .strip().lower() in ('1', 'true', 'yes', 'on')
+        seed_text = request.form.get('seed_text', '').strip()
+
+        if not simulation_requirement:
+            return jsonify({
+                "success": False,
+                "error": t('api.requireSimulationRequirement')
+            }), 400
+
+        uploaded_files = request.files.getlist('files')
+        has_files = bool(uploaded_files) and any(f.filename for f in uploaded_files)
+        # Seed-Material kann aus Dateien, einem seed_text oder den deutschen Quellen stammen
+        if not has_files and not seed_text and not include_german_sources:
+            return jsonify({
+                "success": False,
+                "error": t('api.requireFileUpload')
+            }), 400
+
+        data = run_ontology_pipeline(
+            project_name=project_name,
+            simulation_requirement=simulation_requirement,
+            additional_context=additional_context,
+            include_german_sources=include_german_sources,
+            seed_text=seed_text,
+            incoming_files=uploaded_files,
+        )
+        return jsonify({"success": True, "data": data})
+
+    except OntologyInputError as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+    except OntologyPipelineFailure as pf:
+        return ontology_error_response(pf.cause, pf.project)
+    except Exception as error:
+        return ontology_error_response(error, None)
 
 
 # ============== 接口2：构建图谱 ==============

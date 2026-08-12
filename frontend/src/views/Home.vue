@@ -241,6 +241,9 @@
         </div>
       </section>
 
+      <!-- Projekte (fester Seed, mehrere Runs) -->
+      <ProjectGroups />
+
       <!-- 历史项目数据库 -->
       <HistoryDatabase />
     </div>
@@ -260,6 +263,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import HistoryDatabase from '../components/HistoryDatabase.vue'
+import ProjectGroups from '../components/ProjectGroups.vue'
 import LanguageSwitcher from '../components/LanguageSwitcher.vue'
 import OnboardingWizard from '../components/OnboardingWizard.vue'
 import AIOnboardingWizard from '../components/AIOnboardingWizard.vue'

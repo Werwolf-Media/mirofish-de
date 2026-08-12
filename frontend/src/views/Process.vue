@@ -567,33 +567,43 @@ const initProject = async () => {
 // 处理新建项目 - 调用 ontology/generate API
 const handleNewProject = async () => {
   const pending = getPendingUpload()
-  
-  if (!pending.isPending || (pending.files.length === 0 && !pending.seedText && !pending.includeGermanSources)) {
+
+  if (!pending.isPending || (pending.files.length === 0 && !pending.seedText && !pending.includeGermanSources && !pending.groupId)) {
     error.value = '没有待上传的文件，请返回首页重新操作'
     loading.value = false
     return
   }
-  
+
   try {
     loading.value = true
     currentPhase.value = 0 // 本体生成阶段
     ontologyProgress.value = { message: '正在上传文件并分析文档...' }
-    
-    // 构建 FormData
-    const formDataObj = new FormData()
-    pending.files.forEach(file => {
-      formDataObj.append('files', file)
-    })
-    formDataObj.append('simulation_requirement', pending.simulationRequirement)
-    if (pending.includeGermanSources) {
-      formDataObj.append('include_german_sources', 'true')
-    }
-    if (pending.seedText) {
-      formDataObj.append('seed_text', pending.seedText)
-    }
 
-    // 调用本体生成 API
-    const response = await generateOntology(formDataObj)
+    let response
+    if (pending.groupId) {
+      // Projektmappen-Run: Seed liegt serverseitig, Pipeline startet im Backend
+      const { runInGroup } = await import('../api/groups')
+      response = await runInGroup(pending.groupId, {
+        simulation_requirement: pending.simulationRequirement,
+        include_german_sources: pending.includeGermanSources
+      })
+    } else {
+      // 构建 FormData
+      const formDataObj = new FormData()
+      pending.files.forEach(file => {
+        formDataObj.append('files', file)
+      })
+      formDataObj.append('simulation_requirement', pending.simulationRequirement)
+      if (pending.includeGermanSources) {
+        formDataObj.append('include_german_sources', 'true')
+      }
+      if (pending.seedText) {
+        formDataObj.append('seed_text', pending.seedText)
+      }
+
+      // 调用本体生成 API
+      response = await generateOntology(formDataObj)
+    }
     
     if (response.success) {
       // 清除待上传数据
