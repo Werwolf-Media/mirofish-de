@@ -747,7 +747,8 @@
     "readTwitterProfilesFailed": "Lesen von twitter_profiles.csv fehlgeschlagen: {error}",
     "llmSelectAgentFailed": "LLM-Agentenauswahl fehlgeschlagen, Standardauswahl wird verwendet: {error}",
     "generateInterviewQuestionsFailed": "Generierung der Interviewfragen fehlgeschlagen: {error}",
-    "generateInterviewSummaryFailed": "Generierung der Interviewzusammenfassung fehlgeschlagen: {error}"
+    "generateInterviewSummaryFailed": "Generierung der Interviewzusammenfassung fehlgeschlagen: {error}",
+    "interviewApiFailedSummary": "Interview-Aufruf fehlgeschlagen: {error}. Keine erfolgreichen Interviews — Status der Simulationsumgebung prüfen."
   },
   "actions": {
     "post": "BEITRAG",
@@ -899,7 +900,7 @@
     "costCapHint": "0 = deaktiviert. Wird das OpenRouter-Delta während eines Runs überschritten, bricht die Simulation ab.",
     "saveSettings": "Speichern",
     "settingsApplied": "Gilt sofort für neue Runs — kein Neustart nötig",
-    "modelWarn_reasoning": "„{model}\" ist ein Reasoning-Modell — inkompatibel mit MiroFish (Parameter-Konflikte, versteckte Denk-Tokens verteuern jeden Agent-Call).",
+    "modelWarn_reasoning": "„{model}\" ist ein Reasoning-Modell — läuft über den Kompatibilitäts-Layer, aber versteckte Denk-Tokens verteuern jeden Agent-Call erheblich.",
     "modelWarn_expensive": "„{model}\" ist ein teures Modell — ein Run kann zweistellige EUR-Beträge kosten.",
     "modelWarn_chinese": "„{model}\" neigt trotz Sprachvorgabe zu chinesischer Ausgabe."
   }

@@ -1218,8 +1218,49 @@ class ReportAgent:
                 ]
             )
     
+    def _ensure_report_language(self, text: str, label: str = "") -> str:
+        """
+        Sprach-Wächter für fertige Sektionen: Ist die Zielsprache NICHT
+        Chinesisch, aber der Text enthält nennenswert CJK (Drift durch
+        chinesische Tool-Ausgaben/Korrektur-Prompts), einmalig komplett in
+        die Zielsprache übersetzen lassen. Markdown bleibt erhalten.
+        """
+        try:
+            from ..utils.locale import get_locale
+            if not text or get_locale() == 'zh':
+                return text
+            import re as _re
+            cjk_count = len(_re.findall(r'[一-鿿]', text))
+            # Vereinzelte Zeichen (Namen, Original-Zitate) tolerieren
+            if cjk_count < 20:
+                return text
+            logger.warning(
+                f"Sprach-Wächter: Sektion '{label}' enthält {cjk_count} CJK-Zeichen "
+                f"— übersetze in die Zielsprache"
+            )
+            translated = self.llm.chat(
+                messages=[
+                    {"role": "system", "content":
+                        "Du bist ein präziser Übersetzer. Übersetze den folgenden "
+                        "Bericht-Abschnitt VOLLSTÄNDIG in die Zielsprache. Behalte "
+                        "die Markdown-Struktur (Überschriften, Listen, Zitate, "
+                        "Fettungen) exakt bei. Eigennamen und Produktnamen bleiben "
+                        "unverändert. Gib NUR den übersetzten Text zurück, ohne "
+                        f"Kommentar.\n\n{get_language_instruction()}"},
+                    {"role": "user", "content": text},
+                ],
+                temperature=0.1,
+                max_tokens=4096,
+            )
+            if translated and len(_re.findall(r'[一-鿿]', translated)) < cjk_count:
+                return translated
+            return text
+        except Exception as e:
+            logger.warning(f"Sprach-Wächter fehlgeschlagen ({label}): {e}")
+            return text
+
     def _generate_section_react(
-        self, 
+        self,
         section: ReportSection,
         outline: ReportOutline,
         previous_sections: List[str],
@@ -1665,7 +1706,12 @@ class ReportAgent:
                         ) if progress_callback else None,
                     section_index=section_num
                 )
-                
+
+                # Sprach-Wächter: chinesische Drift abfangen (Problem aus
+                # der Praxis: letzte Sektion kippte durch chinesische
+                # Tool-Ausgaben ins Chinesische)
+                section_content = self._ensure_report_language(section_content, section.title)
+
                 section.content = section_content
                 generated_sections.append(f"## {section.title}\n\n{section_content}")
 

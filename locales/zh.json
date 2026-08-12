@@ -747,7 +747,8 @@
     "readTwitterProfilesFailed": "读取 twitter_profiles.csv 失败: {error}",
     "llmSelectAgentFailed": "LLM选择Agent失败，使用默认选择: {error}",
     "generateInterviewQuestionsFailed": "生成采访问题失败: {error}",
-    "generateInterviewSummaryFailed": "生成采访摘要失败: {error}"
+    "generateInterviewSummaryFailed": "生成采访摘要失败: {error}",
+    "interviewApiFailedSummary": "采访API调用失败：{error}。请检查OASIS模拟环境状态。"
   },
   "actions": {
     "post": "发帖",
@@ -899,7 +900,7 @@
     "costCapHint": "0 = 关闭。若运行期间 OpenRouter 增量超过此值，将中止模拟。",
     "saveSettings": "保存",
     "settingsApplied": "立即对新运行生效——无需重启",
-    "modelWarn_reasoning": "“{model}”是推理模型——与 MiroFish 不兼容（参数冲突，隐藏的思考 token 会抬高每次 agent 调用的成本）。",
+    "modelWarn_reasoning": "“{model}”是推理模型——可通过兼容层运行，但隐藏的思考 token 会显著抬高每次 agent 调用的成本。",
     "modelWarn_expensive": "“{model}”是昂贵模型——单次运行可能花费两位数欧元。",
     "modelWarn_chinese": "“{model}”即使有语言指令也倾向于输出中文。"
   }

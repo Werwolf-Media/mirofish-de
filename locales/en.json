@@ -747,7 +747,8 @@
     "readTwitterProfilesFailed": "Failed to read twitter_profiles.csv: {error}",
     "llmSelectAgentFailed": "LLM agent selection failed, using default selection: {error}",
     "generateInterviewQuestionsFailed": "Failed to generate interview questions: {error}",
-    "generateInterviewSummaryFailed": "Failed to generate interview summary: {error}"
+    "generateInterviewSummaryFailed": "Failed to generate interview summary: {error}",
+    "interviewApiFailedSummary": "Interview call failed: {error}. No successful interviews — check the simulation environment status."
   },
   "actions": {
     "post": "POST",
@@ -899,7 +900,7 @@
     "costCapHint": "0 = disabled. If the OpenRouter delta exceeds this during a run, the simulation is aborted.",
     "saveSettings": "Save",
     "settingsApplied": "Applies immediately to new runs — no restart needed",
-    "modelWarn_reasoning": "\"{model}\" is a reasoning model — incompatible with MiroFish (parameter conflicts, hidden thinking tokens inflate every agent call).",
+    "modelWarn_reasoning": "\"{model}\" is a reasoning model — it works via the compatibility layer, but hidden thinking tokens make every agent call significantly more expensive.",
     "modelWarn_expensive": "\"{model}\" is an expensive model — a single run can cost double-digit euros.",
     "modelWarn_chinese": "\"{model}\" tends to produce Chinese output despite the language directive."
   }

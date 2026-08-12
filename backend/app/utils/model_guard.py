@@ -33,8 +33,8 @@ _CHINESE_MARKERS = ('qwen', 'deepseek', 'glm-', 'minimax', 'kimi', 'yi-', 'ernie
 
 _LOG_TEXT = {
     'reasoning': (
-        "'{model}' ist ein Reasoning-Modell — inkompatibel mit MiroFish "
-        "(Parameter-Konflikte, versteckte Denk-Tokens verteuern jeden Agent-Call). "
+        "'{model}' ist ein Reasoning-Modell — läuft über den Kompatibilitäts-Layer, "
+        "aber versteckte Denk-Tokens verteuern jeden Agent-Call erheblich. "
         f"Empfohlen: {RECOMMENDED_MODEL}"
     ),
     'expensive': (
@@ -60,8 +60,11 @@ def check_model(model: str) -> list:
         return warnings
     m = model.strip().lower()
 
+    # Seit dem Kompat-Layer (openai_chat_compat) laufen Reasoning-Modelle
+    # technisch — aber versteckte Denk-Tokens verteuern jeden Agent-Call,
+    # daher weiterhin Warnung (nur nicht mehr als harter Fehler)
     if any(marker in m for marker in _REASONING_MARKERS):
-        warnings.append({'code': 'reasoning', 'level': 'error', 'model': model})
+        warnings.append({'code': 'reasoning', 'level': 'warning', 'model': model})
 
     is_cheap_variant = any(marker in m for marker in _CHEAP_MARKERS)
     if not is_cheap_variant and any(marker in m for marker in _EXPENSIVE_MARKERS):

@@ -1423,7 +1423,10 @@ class ZepToolsService:
             if not api_result.get("success", False):
                 error_msg = api_result.get("error", "未知错误")
                 logger.warning(t("console.interviewApiReturnedFailure", error=error_msg))
-                result.summary = f"采访API调用失败：{error_msg}。请检查OASIS模拟环境状态。"
+                # Lokalisiert — die Meldung landet als Tool-Ergebnis im
+                # Bericht-Kontext; hartkodiertes Chinesisch triggert dort
+                # Sprach-Drift ganzer Sektionen
+                result.summary = t("console.interviewApiFailedSummary", error=error_msg)
                 return result
             
             # Step 5: 解析API返回结果，构建AgentInterview对象
