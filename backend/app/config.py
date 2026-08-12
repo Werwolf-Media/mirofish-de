@@ -40,7 +40,7 @@ class Config:
     # Modell für den KI-Onboarding-Assistenten (stärkeres Modell für bessere
     # Prompt-Generierung). Gleicher OpenRouter-Key/-Base-URL; Fallback: LLM_MODEL_NAME.
     WIZARD_MODEL_NAME = os.environ.get('WIZARD_MODEL_NAME') \
-        or os.environ.get('LLM_MODEL_NAME', 'anthropic/claude-3.5-sonnet')
+        or os.environ.get('LLM_MODEL_NAME', 'anthropic/claude-sonnet-5')
 
     # Abrechnung: USD->EUR-Näherungskurs + Standard-Abrechnungspreis pro Run
     EUR_PER_USD = float(os.environ.get('EUR_PER_USD', '0.92'))
