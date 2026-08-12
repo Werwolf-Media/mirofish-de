@@ -193,29 +193,41 @@ const initProject = async () => {
 
 const handleNewProject = async () => {
   const pending = getPendingUpload()
-  if (!pending.isPending || (pending.files.length === 0 && !pending.seedText && !pending.includeGermanSources)) {
+  if (!pending.isPending || (pending.files.length === 0 && !pending.seedText && !pending.includeGermanSources && !pending.groupId)) {
     error.value = 'No pending input found.'
     addLog('Error: No pending input found for new project.')
     return
   }
-  
+
   try {
     loading.value = true
     currentPhase.value = 0
     ontologyProgress.value = { message: 'Uploading and analyzing docs...' }
-    addLog('Starting ontology generation: Uploading files...')
-    
-    const formData = new FormData()
-    pending.files.forEach(f => formData.append('files', f))
-    formData.append('simulation_requirement', pending.simulationRequirement)
-    if (pending.includeGermanSources) {
-      formData.append('include_german_sources', 'true')
-    }
-    if (pending.seedText) {
-      formData.append('seed_text', pending.seedText)
-    }
 
-    const res = await generateOntology(formData)
+    let res
+    if (pending.groupId) {
+      // Projektmappen-Run: Seed liegt serverseitig, Pipeline startet im Backend
+      addLog(`Starting ontology generation from project seed (${pending.groupId})...`)
+      const { runInGroup } = await import('../api/groups')
+      res = await runInGroup(pending.groupId, {
+        simulation_requirement: pending.simulationRequirement,
+        include_german_sources: pending.includeGermanSources
+      })
+    } else {
+      addLog('Starting ontology generation: Uploading files...')
+
+      const formData = new FormData()
+      pending.files.forEach(f => formData.append('files', f))
+      formData.append('simulation_requirement', pending.simulationRequirement)
+      if (pending.includeGermanSources) {
+        formData.append('include_german_sources', 'true')
+      }
+      if (pending.seedText) {
+        formData.append('seed_text', pending.seedText)
+      }
+
+      res = await generateOntology(formData)
+    }
     if (res.success) {
       clearPendingUpload()
       currentProjectId.value = res.data.project_id
