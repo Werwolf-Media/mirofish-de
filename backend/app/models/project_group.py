@@ -41,12 +41,13 @@ class ProjectGroupManager:
     # ------------------------------------------------------------ CRUD
 
     @classmethod
-    def create(cls, name: str, seed_text: str = '') -> Dict[str, Any]:
+    def create(cls, name: str, seed_text: str = '', competitors=None) -> Dict[str, Any]:
         group_id = f"group_{uuid.uuid4().hex[:12]}"
         group = {
             'group_id': group_id,
             'name': (name or '').strip() or 'Unbenanntes Projekt',
             'seed_text': (seed_text or '').strip(),
+            'competitors': competitors or [],
             'files': [],           # [{original_filename, saved_filename, size}]
             'runs': [],            # [{project_id, requirement, created_at}]
             'created_at': datetime.now().isoformat(),

@@ -225,6 +225,9 @@ const handleNewProject = async () => {
       if (pending.seedText) {
         formData.append('seed_text', pending.seedText)
       }
+      if (pending.competitors) {
+        formData.append('competitors', pending.competitors)
+      }
 
       res = await generateOntology(formData)
     }

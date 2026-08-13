@@ -105,6 +105,15 @@ def generate_report():
                 "success": False,
                 "error": t('api.missingSimRequirement')
             }), 400
+
+        # Konkurrenzanalyse aktiv? Dann MUSS der Bericht eine eigene
+        # Wettbewerbs-Sektion enthalten (Recherche-Daten liegen im Graphen)
+        competitors = getattr(project, 'competitors', None) or []
+        if competitors:
+            simulation_requirement = (
+                f"{simulation_requirement}\n\n"
+                + t('api.competitorSectionDirective', competitors=", ".join(competitors))
+            )
         
         # 提前生成 report_id，以便立即返回给前端
         import uuid

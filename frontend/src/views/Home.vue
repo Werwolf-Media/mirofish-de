@@ -225,6 +225,24 @@
               </label>
             </div>
 
+            <!-- Opt-in: Echtzeit-Konkurrenzanalyse -->
+            <div class="console-section">
+              <label class="source-optin" :class="{ disabled: loading }">
+                <input type="checkbox" v-model="includeCompetitors" :disabled="loading" />
+                <span class="source-optin-text">
+                  <span class="source-optin-label">{{ $t('home.competitorsLabel') }}</span>
+                  <span class="source-optin-hint">{{ $t('home.competitorsHint') }}</span>
+                </span>
+              </label>
+              <input
+                v-if="includeCompetitors"
+                v-model="competitorsInput"
+                class="competitors-input"
+                :placeholder="$t('home.competitorsPlaceholder')"
+                :disabled="loading"
+              />
+            </div>
+
             <!-- 启动按钮 -->
             <div class="console-section btn-section">
               <button 
@@ -295,6 +313,8 @@ const files = ref([])
 
 // Opt-in: aktuelle deutsche Quellen als zusätzliches Seed-Material einbeziehen
 const includeGermanSources = ref(false)
+const includeCompetitors = ref(false)
+const competitorsInput = ref('')
 
 // 状态
 const loading = ref(false)
@@ -369,7 +389,8 @@ const startSimulation = () => {
   
   // 存储待上传的数据
   import('../store/pendingUpload.js').then(({ setPendingUpload }) => {
-    setPendingUpload(files.value, formData.value.simulationRequirement, includeGermanSources.value)
+    setPendingUpload(files.value, formData.value.simulationRequirement, includeGermanSources.value, '',
+      includeCompetitors.value ? competitorsInput.value : '')
     
     // 立即跳转到Process页面（使用特殊标识表示新建项目）
     router.push({
@@ -1075,6 +1096,17 @@ const startSimulation = () => {
     margin-bottom: 20px;
   }
 }
+.competitors-input {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid #e0e0e0;
+  background: #fafafa;
+  font-family: inherit;
+  font-size: 0.82rem;
+}
+.competitors-input:focus { border-color: #ff6b2c; outline: none; background: #fff; }
 </style>
 
 <style>

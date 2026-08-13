@@ -85,7 +85,10 @@
     "startEngine": "启动引擎",
     "initializing": "初始化中...",
     "germanSourcesLabel": "引入德语来源",
-    "germanSourcesHint": "可选：根据需求抓取相关的德语新闻作为额外的种子材料"
+    "germanSourcesHint": "可选：根据需求抓取相关的德语新闻作为额外的种子材料",
+    "competitorsLabel": "纳入实时竞争分析",
+    "competitorsHint": "对竞争对手的实时调研（新闻+网站）会进入模拟和报告——含专门的竞争章节",
+    "competitorsPlaceholder": "竞争对手，逗号分隔：如 ToolTime, www.hero-software.de, Craftnote"
   },
   "main": {
     "layoutGraph": "图谱",
@@ -478,7 +481,10 @@
     "germanSourcesFailed": "抓取德语来源失败：{error}",
     "loginInvalid": "密码错误",
     "seedTextLabel": "描述（助手）",
-    "costCapExceeded": "超出成本上限（{cost} € > {limit} €）——已中止模拟。"
+    "costCapExceeded": "超出成本上限（{cost} € > {limit} €）——已中止模拟。",
+    "competitorHeader": "实时竞争分析",
+    "competitorFilename": "竞争调研（实时）",
+    "competitorSectionDirective": "[竞争] 报告必须包含专门的“竞争对比”章节：定位、优劣势以及模拟主体相对这些竞争对手的反应：{competitors}。请使用图谱中的实时调研数据（网站+最新新闻）。"
   },
   "progress": {
     "initGraphService": "初始化图谱构建服务...",
@@ -931,6 +937,9 @@
     "seedTextLabel": "种子文本",
     "nameRequired": "请填写项目名称。",
     "seedRequired": "请至少提供一个种子文档（PDF/MD/TXT）或种子文本。",
-    "notFound": "未找到项目。"
+    "notFound": "未找到项目。",
+    "competitors": "竞争对手",
+    "competitorsPlaceholder": "如 ToolTime, www.hero-software.de, Craftnote",
+    "competitorsHint": "名称或网站，逗号分隔（最多5个）——每次运行时实时调研"
   }
 }

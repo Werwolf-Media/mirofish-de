@@ -135,7 +135,8 @@ class OntologyPipelineFailure(Exception):
 
 def run_ontology_pipeline(project_name, simulation_requirement, additional_context='',
                           include_german_sources=False, seed_text='',
-                          incoming_files=None, disk_files=None, billing_name=None):
+                          incoming_files=None, disk_files=None, billing_name=None,
+                          competitors=None):
     """
     Kern von Schritt 1 (Ontologie-Generierung): Projekt anlegen, Seed-Material
     einlesen, Ontologie generieren. Genutzt von /api/graph/ontology/generate
@@ -218,6 +219,25 @@ def run_ontology_pipeline(project_name, simulation_requirement, additional_conte
             except Exception as e:
                 logger.warning(t('api.germanSourcesFailed', error=str(e)))
 
+        # Opt-in: Echtzeit-Konkurrenzanalyse (Namen/URLs -> News + Websites)
+        competitor_count = 0
+        competitors = [c for c in (competitors or []) if isinstance(c, str) and c.strip()]
+        if competitors:
+            try:
+                from ..services.competitor_sources import CompetitorResearchService
+                comp_text, competitor_count = CompetitorResearchService.fetch(competitors)
+                if comp_text:
+                    processed = TextProcessor.preprocess_text(comp_text)
+                    document_texts.append(processed)
+                    all_text += f"\n\n=== {t('api.competitorHeader')} ===\n{processed}"
+                    project.files.append({
+                        "filename": t('api.competitorFilename'),
+                        "size": len(processed)
+                    })
+                project.competitors = competitors
+            except Exception as e:
+                logger.warning(f"Konkurrenzanalyse fehlgeschlagen: {e}")
+
         if not document_texts:
             ProjectManager.delete_project(project.project_id)
             raise OntologyInputError(t('api.noDocProcessed'))
@@ -256,7 +276,9 @@ def run_ontology_pipeline(project_name, simulation_requirement, additional_conte
             "analysis_summary": project.analysis_summary,
             "files": project.files,
             "total_text_length": project.total_text_length,
-            "german_sources_count": german_sources_count
+            "german_sources_count": german_sources_count,
+            "competitor_count": competitor_count,
+            "competitors": project.competitors
         }
     except OntologyInputError:
         raise
@@ -337,6 +359,10 @@ def generate_ontology():
         include_german_sources = request.form.get('include_german_sources', '') \
             .strip().lower() in ('1', 'true', 'yes', 'on')
         seed_text = request.form.get('seed_text', '').strip()
+        from ..services.competitor_sources import CompetitorResearchService
+        competitors = CompetitorResearchService.parse_competitors(
+            request.form.get('competitors', '')
+        )
 
         if not simulation_requirement:
             return jsonify({
@@ -360,6 +386,7 @@ def generate_ontology():
             include_german_sources=include_german_sources,
             seed_text=seed_text,
             incoming_files=uploaded_files,
+            competitors=competitors,
         )
         return jsonify({"success": True, "data": data})
 

@@ -85,7 +85,10 @@
     "startEngine": "Start Engine",
     "initializing": "Initializing...",
     "germanSourcesLabel": "Include German sources",
-    "germanSourcesHint": "Optional: fetch current German news matching your prompt as extra seed material"
+    "germanSourcesHint": "Optional: fetch current German news matching your prompt as extra seed material",
+    "competitorsLabel": "Include real-time competitor analysis",
+    "competitorsHint": "Live research on competitors (news + websites) feeds simulation and report — incl. a dedicated competition section",
+    "competitorsPlaceholder": "Competitors, comma-separated: e.g. ToolTime, www.hero-software.de, Craftnote"
   },
   "main": {
     "layoutGraph": "Graph",
@@ -478,7 +481,10 @@
     "germanSourcesFailed": "Failed to fetch German sources: {error}",
     "loginInvalid": "Incorrect password",
     "seedTextLabel": "Description (Assistant)",
-    "costCapExceeded": "Cost cap exceeded ({cost} € > {limit} €) — simulation aborted."
+    "costCapExceeded": "Cost cap exceeded ({cost} € > {limit} €) — simulation aborted.",
+    "competitorHeader": "Real-time competitor analysis",
+    "competitorFilename": "Competitor research (live)",
+    "competitorSectionDirective": "[COMPETITION] The report MUST contain a dedicated \"Competitive Comparison\" section: positioning, strengths/weaknesses and the simulated agents' reactions compared to these competitors: {competitors}. Use the live research data stored in the graph (websites + current news)."
   },
   "progress": {
     "initGraphService": "Initializing graph build service...",
@@ -931,6 +937,9 @@
     "seedTextLabel": "Seed text",
     "nameRequired": "Please provide a project name.",
     "seedRequired": "Please provide at least one seed document (PDF/MD/TXT) or a seed text.",
-    "notFound": "Project not found."
+    "notFound": "Project not found.",
+    "competitors": "Competitors",
+    "competitorsPlaceholder": "e.g. ToolTime, www.hero-software.de, Craftnote",
+    "competitorsHint": "Names or websites, comma-separated (max. 5) — researched live on every run"
   }
 }

@@ -29,6 +29,12 @@
           <textarea v-model="newSeedText" class="pg-textarea" rows="3"
                     :placeholder="$t('groups.seedTextPlaceholder')"></textarea>
         </div>
+        <div class="pg-field">
+          <label>{{ $t('groups.competitors') }} <span class="pg-hint">({{ $t('groups.optional') }})</span></label>
+          <input v-model="newCompetitors" class="pg-input"
+                 :placeholder="$t('groups.competitorsPlaceholder')" />
+          <span class="pg-hint">{{ $t('groups.competitorsHint') }}</span>
+        </div>
         <div class="pg-create-actions">
           <button class="pg-btn pg-btn-primary" :disabled="creating || !newName.trim() || (newFiles.length === 0 && !newSeedText.trim())"
                   @click="submitCreate">
@@ -57,6 +63,7 @@
         <div class="pg-seed mono">
           <span v-for="f in g.files" :key="f.saved_filename" class="pg-seed-file">📄 {{ f.original_filename }}</span>
           <span v-if="g.seed_text" class="pg-seed-file">📝 {{ $t('groups.seedTextLabel') }}</span>
+          <span v-for="c in (g.competitors || [])" :key="c" class="pg-seed-file">🎯 {{ c }}</span>
         </div>
 
         <!-- Neuer Run -->
@@ -105,6 +112,7 @@ const creating = ref(false)
 const createError = ref('')
 const newName = ref('')
 const newSeedText = ref('')
+const newCompetitors = ref('')
 const newFiles = ref([])
 const runPrompts = reactive({})
 const startingId = ref('')
@@ -127,6 +135,7 @@ const resetCreate = () => {
   createError.value = ''
   newName.value = ''
   newSeedText.value = ''
+  newCompetitors.value = ''
   newFiles.value = []
 }
 
@@ -137,6 +146,7 @@ const submitCreate = async () => {
     const fd = new FormData()
     fd.append('name', newName.value.trim())
     if (newSeedText.value.trim()) fd.append('seed_text', newSeedText.value.trim())
+    if (newCompetitors.value.trim()) fd.append('competitors', newCompetitors.value.trim())
     newFiles.value.forEach(f => fd.append('files', f))
     const res = await createGroup(fd)
     if (res.success) {

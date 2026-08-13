@@ -37,6 +37,10 @@ def create_group():
     """
     name = (request.form.get('name') or '').strip()
     seed_text = (request.form.get('seed_text') or '').strip()
+    from ..services.competitor_sources import CompetitorResearchService
+    competitors = CompetitorResearchService.parse_competitors(
+        request.form.get('competitors', '')
+    )
     uploaded = [f for f in request.files.getlist('files') if f and f.filename]
 
     if not name:
@@ -44,7 +48,7 @@ def create_group():
     if not uploaded and not seed_text:
         return jsonify({"success": False, "error": t('groups.seedRequired')}), 400
 
-    group = ProjectGroupManager.create(name=name, seed_text=seed_text)
+    group = ProjectGroupManager.create(name=name, seed_text=seed_text, competitors=competitors)
 
     skipped = []
     for f in uploaded:
@@ -121,6 +125,7 @@ def run_in_group(group_id: str):
             seed_text=group.get('seed_text', ''),
             disk_files=ProjectGroupManager.disk_files(group_id),
             billing_name=project_name,
+            competitors=group.get('competitors', []),
         )
     except OntologyInputError as e:
         return jsonify({"success": False, "error": str(e)}), 400

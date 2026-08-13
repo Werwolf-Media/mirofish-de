@@ -85,7 +85,10 @@
     "startEngine": "Engine starten",
     "initializing": "Wird initialisiert ...",
     "germanSourcesLabel": "Deutsche Quellen einbeziehen",
-    "germanSourcesHint": "Optional: aktuelle deutsche Nachrichten passend zum Prompt als zusätzliches Seed-Material abrufen"
+    "germanSourcesHint": "Optional: aktuelle deutsche Nachrichten passend zum Prompt als zusätzliches Seed-Material abrufen",
+    "competitorsLabel": "Echtzeit-Konkurrenzanalyse einbeziehen",
+    "competitorsHint": "Live-Recherche zu Wettbewerbern (News + Websites) fließt in Simulation und Bericht ein — inkl. eigener Wettbewerbs-Sektion",
+    "competitorsPlaceholder": "Wettbewerber, kommagetrennt: z. B. ToolTime, www.hero-software.de, Craftnote"
   },
   "main": {
     "layoutGraph": "Graph",
@@ -478,7 +481,10 @@
     "germanSourcesFailed": "Abruf deutscher Quellen fehlgeschlagen: {error}",
     "loginInvalid": "Falsches Passwort",
     "seedTextLabel": "Beschreibung (Assistent)",
-    "costCapExceeded": "Kosten-Deckel überschritten ({cost} € > {limit} €) — Simulation abgebrochen."
+    "costCapExceeded": "Kosten-Deckel überschritten ({cost} € > {limit} €) — Simulation abgebrochen.",
+    "competitorHeader": "Echtzeit-Konkurrenzanalyse",
+    "competitorFilename": "Konkurrenz-Recherche (live)",
+    "competitorSectionDirective": "[WETTBEWERB] Der Bericht MUSS eine eigene Sektion »Wettbewerbsvergleich« enthalten: Positionierung, Stärken/Schwächen und die Reaktionen der simulierten Agenten im Vergleich zu diesen Wettbewerbern: {competitors}. Nutze die im Graphen hinterlegten Live-Recherchedaten (Websites + aktuelle Nachrichten)."
   },
   "progress": {
     "initGraphService": "Graph-Aufbaudienst wird initialisiert ...",
@@ -931,6 +937,9 @@
     "seedTextLabel": "Seed-Text",
     "nameRequired": "Bitte einen Projektnamen angeben.",
     "seedRequired": "Bitte mindestens ein Seed-Dokument (PDF/MD/TXT) oder einen Seed-Text angeben.",
-    "notFound": "Projekt nicht gefunden."
+    "notFound": "Projekt nicht gefunden.",
+    "competitors": "Wettbewerber",
+    "competitorsPlaceholder": "z. B. ToolTime, www.hero-software.de, Craftnote",
+    "competitorsHint": "Namen oder Websites, kommagetrennt (max. 5) — wird bei jedem Run live recherchiert"
   }
 }
